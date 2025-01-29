@@ -31,30 +31,29 @@ train_transform = transforms.Compose([
     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])
 
-
 val_test_transform = transforms.Compose([
-    transforms.Resize((512, 512)),  # Resize to 512x512
-    transforms.ToTensor(),  # Convert image to PyTorch tensor
-    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])  # Normalize
+    transforms.Resize((512, 512)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])
 
-# Load dataset with training transformations
+# Load dataset
 dataset = MicroscopyDataset(
     csv_file="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/labels.csv",
     root_dir="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data",
-    transform=None  # No transform applied directly here; will assign per split below
+    transform=None
 )
 
-# Split dataset into training (70%), validation (20%), and test (10%)
+# Split dataset
 train_size = int(0.7 * len(dataset))
 val_size = int(0.2 * len(dataset))
 test_size = len(dataset) - train_size - val_size
 train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
 
 # Assign transformations to datasets
-train_dataset.dataset.transform = train_transform  # Apply data augmentation for training
-val_dataset.dataset.transform = val_test_transform  # No augmentation for validation
-test_dataset.dataset.transform = val_test_transform  # No augmentation for testing
+train_dataset.dataset.transform = train_transform
+val_dataset.dataset.transform = val_test_transform
+test_dataset.dataset.transform = val_test_transform
 
 # DataLoaders
 dataloaders = {
@@ -63,10 +62,11 @@ dataloaders = {
     'test': DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 }
 
-# Initialize the model, loss function, and optimizer
+# Initialize model, loss function, optimizer, and scheduler
 model = MicroscopyCNN()
 criterion = nn.SmoothL1Loss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)  # Reduce LR every 20 epochs
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
@@ -76,41 +76,35 @@ print(f"Using device: {device}")
 root = tk.Tk()
 root.title("Microscopy Model Training")
 
-# Add a plot for training and validation loss
 fig, ax = plt.subplots(figsize=(6, 4))
 ax.set_xlabel('Epoch')
 ax.set_ylabel('Loss')
 ax.set_title('Training and Validation Loss')
 ax.set_xlim(0, epochs)
 ax.set_ylim(0, 1)
-
-canvas = FigureCanvasTkAgg(fig, master=root)  # A Tkinter canvas
+canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().pack()
 
-# Text box for logs
 log_box = scrolledtext.ScrolledText(root, width=50, height=10)
 log_box.pack()
 
-# Training function with live updates to the GUI
 def train():
     train_losses = []
-    val_losses = []  # Track validation losses
+    val_losses = []
 
     def update_plot():
-        ax.clear()  # Clear the previous plot
-        ax.plot(train_losses, label='Training Loss', color='blue')  # Plot training loss
-        ax.plot(val_losses, label='Validation Loss', color='orange')  # Plot validation loss
+        ax.clear()
+        ax.plot(train_losses, label='Training Loss', color='blue')
+        ax.plot(val_losses, label='Validation Loss', color='orange')
         ax.set_xlabel('Epoch')
         ax.set_ylabel('Loss')
         ax.set_title('Training and Validation Loss')
-        ax.set_xlim(0, max(len(train_losses), len(val_losses)))  # Adjust x-axis dynamically
-        all_losses = train_losses + val_losses
-        ax.set_ylim(0, max(all_losses) + 0.1)  # Adjust y-axis based on both losses
+        ax.set_xlim(0, max(len(train_losses), len(val_losses)))
+        ax.set_ylim(0, max(train_losses + val_losses) + 0.1)
         ax.legend()
         canvas.draw()
 
     for epoch in range(epochs):
-        # Training step
         model.train()
         running_loss = 0.0
         for images, labels in tqdm(dataloaders['train'], desc=f"Epoch {epoch + 1}/{epochs}"):
@@ -124,7 +118,6 @@ def train():
         train_loss = running_loss / len(dataloaders['train'])
         train_losses.append(train_loss)
 
-        # Validation step
         model.eval()
         val_loss = 0.0
         with torch.no_grad():
@@ -136,22 +129,13 @@ def train():
         val_loss = val_loss / len(dataloaders['val'])
         val_losses.append(val_loss)
 
-        # Log the losses
-        log_box.insert(tk.END, f"Epoch [{epoch + 1}/{epochs}] - Training Loss: {train_loss:.4f}\n Validation Loss: {val_loss:.4f}\n")
-        log_box.yview(tk.END)  # Scroll to the bottom
+        scheduler.step()  # Step the learning rate scheduler
 
-        # Update the plot
+        log_box.insert(tk.END, f"Epoch [{epoch + 1}/{epochs}] - Training Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}, LR: {scheduler.get_last_lr()[0]:.6f}\n")
+        log_box.yview(tk.END)
         update_plot()
-
-        # Manually update the GUI
         root.update()
 
-    if input("Save trained model? (yes/no): ").strip().lower() == 'yes':
-        torch.save(model.state_dict(), "../models/microscopy_model.pth")
-        log_box.insert(tk.END, "Model saved.\n")
-        log_box.yview(tk.END)
-
-# Function to test the model
 def test():
     model.eval()
     test_loss = 0.0
@@ -164,12 +148,10 @@ def test():
     log_box.insert(tk.END, f"Test Loss: {test_loss / len(dataloaders['test']):.4f}\n")
     log_box.yview(tk.END)
 
-# Buttons to control the operations
 train_button = tk.Button(root, text="Train", command=train)
 train_button.pack()
 
 test_button = tk.Button(root, text="Test", command=test)
 test_button.pack()
 
-# Run the Tkinter event loop
 root.mainloop()
