@@ -16,7 +16,7 @@ torch.manual_seed(42)
 
 # Hyperparameters
 batch_size = 16
-epochs = 200
+epochs = 100
 learning_rate = 1e-4
 
 # Define transformations for training, validation, and test datasets
