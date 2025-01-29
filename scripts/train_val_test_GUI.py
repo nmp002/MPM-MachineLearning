@@ -64,7 +64,7 @@ dataloaders = {
 
 # Initialize model, loss function, optimizer, and scheduler
 model = MicroscopyCNN()
-criterion = nn.SmoothL1Loss()
+criterion = nn.BCELoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)  # Reduce LR every 20 epochs
 
