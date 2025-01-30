@@ -28,7 +28,7 @@ class MicroscopyDataset(Dataset):
                         fad_path = os.path.join(fov_dir, "fad.tif")
                         nadh_path = os.path.join(fov_dir, "nadh.tif")
                         shg_path = os.path.join(fov_dir, "shg.tif")
-                        orr_path = os.path.join(fov_dir, f"fov{fov}_colorORRMapUniform.jpg")
+                        orr_path = os.path.join(fov_dir, f"fov{fov}colorORRMapUniform.jpg")
 
                         if all(os.path.exists(p) for p in [fad_path, nadh_path, shg_path, orr_path]):
                             samples.append((fad_path, nadh_path, shg_path, orr_path, recurrence_score))
@@ -52,6 +52,7 @@ class MicroscopyDataset(Dataset):
 
     def __len__(self):
         return len(self.samples)
+
 
     def __getitem__(self, idx):
         fad_path, nadh_path, shg_path, orr_path, label = self.samples[idx]
@@ -118,7 +119,7 @@ def visualize_cropped_orr(dataset, num_samples=3):
     plt.tight_layout()
     plt.show()
 
-visualize_cropped_orr(dataset)
+# visualize_cropped_orr(dataset)
 
 dataloader = DataLoader(dataset, batch_size=8, shuffle=True)
 

@@ -16,7 +16,7 @@ torch.manual_seed(42)
 
 # Hyperparameters
 batch_size = 16
-epochs = 100
+epochs = 200
 learning_rate = 1e-4
 
 # Define transformations for training, validation, and test datasets
@@ -28,13 +28,13 @@ train_transform = transforms.Compose([
     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
     transforms.RandomResizedCrop(size=(512, 512), scale=(0.8, 1.0)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+    transforms.Normalize(mean=[0.5, 0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5, 0.5])
 ])
 
 val_test_transform = transforms.Compose([
     transforms.Resize((512, 512)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+    transforms.Normalize(mean=[0.5, 0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5, 0.5])
 ])
 
 # Load dataset
@@ -71,6 +71,13 @@ scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)  # Red
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 print(f"Using device: {device}")
+
+for images, labels in dataloaders['train']:
+    print("Image shape:", images.shape)  # Should be [batch_size, 4, 512, 512]
+    print("Label shape:", labels.shape)  # Should be [batch_size]
+    break
+
+
 
 # GUI setup
 root = tk.Tk()
