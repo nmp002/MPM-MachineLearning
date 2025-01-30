@@ -9,7 +9,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
-from tkinter import scrolledtext
+from tkinter import scrolledtext, Checkbutton, IntVar
 
 # Set random seed for reproducibility
 torch.manual_seed(42)
@@ -28,13 +28,13 @@ train_transform = transforms.Compose([
     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
     transforms.RandomResizedCrop(size=(512, 512), scale=(0.8, 1.0)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5, 0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5, 0.5])
+    transforms.Normalize(mean=[0.5] * 4, std=[0.5] * 4)
 ])
 
 val_test_transform = transforms.Compose([
     transforms.Resize((512, 512)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5, 0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5, 0.5])
+    transforms.Normalize(mean=[0.5] * 4, std=[0.5] * 4)
 ])
 
 # Load dataset
@@ -62,22 +62,23 @@ dataloaders = {
     'test': DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 }
 
-# Initialize model, loss function, optimizer, and scheduler
-model = MicroscopyCNN()
-criterion = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)  # Reduce LR every 20 epochs
+# Initialize models
+regression_model = MicroscopyCNN(task='regression')
+classification_model = MicroscopyCNN(task='classification')
 
+# Loss functions
+regression_criterion = nn.MSELoss()
+classification_criterion = nn.BCELoss()
+
+# Optimizers
+regression_optimizer = optim.Adam(regression_model.parameters(), lr=learning_rate, weight_decay=1e-4)
+classification_optimizer = optim.Adam(classification_model.parameters(), lr=learning_rate, weight_decay=1e-4)
+
+# Device setup
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
+regression_model.to(device)
+classification_model.to(device)
 print(f"Using device: {device}")
-
-for images, labels in dataloaders['train']:
-    print("Image shape:", images.shape)  # Should be [batch_size, 4, 512, 512]
-    print("Label shape:", labels.shape)  # Should be [batch_size]
-    break
-
-
 
 # GUI setup
 root = tk.Tk()
@@ -87,41 +88,39 @@ fig, ax = plt.subplots(figsize=(6, 4))
 ax.set_xlabel('Epoch')
 ax.set_ylabel('Loss')
 ax.set_title('Training and Validation Loss')
-ax.set_xlim(0, epochs)
-ax.set_ylim(0, 1)
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().pack()
 
 log_box = scrolledtext.ScrolledText(root, width=50, height=10)
 log_box.pack()
 
-def train():
-    train_losses = []
-    val_losses = []
+# Checkbuttons to select models for training
+train_regression = IntVar()
+train_classification = IntVar()
+regression_check = Checkbutton(root, text="Train Regression Model", variable=train_regression)
+classification_check = Checkbutton(root, text="Train Classification Model", variable=train_classification)
+regression_check.pack()
+classification_check.pack()
 
-    def update_plot():
-        ax.clear()
-        ax.plot(train_losses, label='Training Loss', color='blue')
-        ax.plot(val_losses, label='Validation Loss', color='orange')
-        ax.set_xlabel('Epoch')
-        ax.set_ylabel('Loss')
-        ax.set_title('Training and Validation Loss')
-        ax.set_xlim(0, max(len(train_losses), len(val_losses)))
-        ax.set_ylim(0, max(train_losses + val_losses) + 0.1)
-        ax.legend()
-        canvas.draw()
 
+def train(model, criterion, optimizer, task):
+    train_losses, val_losses = [], []
     for epoch in range(epochs):
         model.train()
         running_loss = 0.0
-        for images, labels in tqdm(dataloaders['train'], desc=f"Epoch {epoch + 1}/{epochs}"):
+        for images, labels in tqdm(dataloaders['train'], desc=f"{task.upper()} Epoch {epoch + 1}/{epochs}"):
             images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
-            outputs = model(images)
-            loss = criterion(outputs.squeeze(), labels)
+
+            outputs = model(images).squeeze()
+            if task == 'classification':
+                labels = (labels > 30).float()  # Convert to binary labels (0 or 1)
+
+            loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
+
         train_loss = running_loss / len(dataloaders['train'])
         train_losses.append(train_loss)
 
@@ -130,35 +129,36 @@ def train():
         with torch.no_grad():
             for images, labels in dataloaders['val']:
                 images, labels = images.to(device), labels.to(device)
-                outputs = model(images)
-                loss = criterion(outputs.squeeze(), labels)
+                outputs = model(images).squeeze()
+                if task == 'classification':
+                    labels = (labels > 30).float()
+                loss = criterion(outputs, labels)
                 val_loss += loss.item()
-        val_loss = val_loss / len(dataloaders['val'])
+        val_loss /= len(dataloaders['val'])
         val_losses.append(val_loss)
 
-        scheduler.step()  # Step the learning rate scheduler
-
-        log_box.insert(tk.END, f"Epoch [{epoch + 1}/{epochs}] - Training Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}, LR: {scheduler.get_last_lr()[0]:.6f}\n")
+        log_box.insert(tk.END,
+                       f"{task.upper()} Epoch [{epoch + 1}/{epochs}] - Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}\n")
         log_box.yview(tk.END)
-        update_plot()
         root.update()
 
-def test():
-    model.eval()
-    test_loss = 0.0
-    with torch.no_grad():
-        for images, labels in dataloaders['test']:
-            images, labels = images.to(device), labels.to(device)
-            outputs = model(images)
-            loss = criterion(outputs.squeeze(), labels)
-            test_loss += loss.item()
-    log_box.insert(tk.END, f"Test Loss: {test_loss / len(dataloaders['test']):.4f}\n")
+
+def train_models():
+    if train_regression.get():
+        train(regression_model, regression_criterion, regression_optimizer, 'regression')
+    if train_classification.get():
+        train(classification_model, classification_criterion, classification_optimizer, 'classification')
+
+
+def test_models():
+    log_box.insert(tk.END, "Testing models...\n")
     log_box.yview(tk.END)
 
-train_button = tk.Button(root, text="Train", command=train)
+
+train_button = tk.Button(root, text="Train Selected Models", command=train_models)
 train_button.pack()
 
-test_button = tk.Button(root, text="Test", command=test)
+test_button = tk.Button(root, text="Test Models", command=test_models)
 test_button.pack()
 
 root.mainloop()

@@ -2,9 +2,14 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+
 class MicroscopyCNN(nn.Module):
-    def __init__(self):
+    def __init__(self, task='regression'):
+        """
+        task: 'regression' or 'classification'
+        """
         super(MicroscopyCNN, self).__init__()
+        self.task = task
 
         # First convolutional layer
         self.conv1 = nn.Conv2d(in_channels=4, out_channels=16, kernel_size=3, stride=1, padding=1)
@@ -24,7 +29,11 @@ class MicroscopyCNN(nn.Module):
         # Fully connected layers
         self.fc1 = nn.Linear(64 * 64 * 64, 128)  # Adjusted based on the size of the output after pooling
         self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, 1)  # Output a single recurrence score
+
+        if self.task == 'regression':
+            self.fc3 = nn.Linear(64, 1)  # Single output for regression
+        else:
+            self.fc3 = nn.Linear(64, 1)  # Binary classification output
 
         # Dropout layers
         self.dropout = nn.Dropout(0.5)  # Dropout with 50% probability to prevent overfitting
@@ -40,19 +49,25 @@ class MicroscopyCNN(nn.Module):
         # Apply dropout to the fully connected layers
         x = self.dropout(self.fc1(x))  # Dropout after fc1
         x = self.dropout(self.fc2(x))  # Dropout after fc2
-        x = self.fc3(x)
 
-        return x
+        if self.task == 'regression':
+            return self.fc3(x)  # Raw output for regression
+        else:
+            return torch.sigmoid(self.fc3(x))  # Sigmoid for classification
 
 
-# Initialize the model
-model = MicroscopyCNN()
+# Initialize models
+regression_model = MicroscopyCNN(task='regression')
+classification_model = MicroscopyCNN(task='classification')
 
-# Loss function (Mean Squared Error for regression)
-criterion = nn.MSELoss()
+# Loss function
+regression_criterion = nn.MSELoss()
+classification_criterion = nn.BCELoss()
 
 # Optimizer (Adam with weight decay for L2 regularization)
-optimizer = optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)  # L2 regularization (weight decay)
+regression_optimizer = optim.Adam(regression_model.parameters(), lr=1e-3, weight_decay=1e-4)  # L2 regularization
+classification_optimizer = optim.Adam(classification_model.parameters(), lr=1e-3, weight_decay=1e-4)
 
 # Print model summary
-print(model)
+print(regression_model)
+print(classification_model)
