@@ -9,7 +9,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
-from tkinter import scrolledtext, Checkbutton, IntVar
+from tkinter import scrolledtext, Checkbutton, IntVar, Frame
 
 # Set random seed for reproducibility
 torch.manual_seed(42)
@@ -17,7 +17,7 @@ torch.manual_seed(42)
 # Hyperparameters
 batch_size = 16
 epochs = 200
-learning_rate = 1e-4
+learning_rate = 1e-8
 
 # Define transformations for training, validation, and test datasets
 train_transform = transforms.Compose([
@@ -71,8 +71,8 @@ regression_criterion = nn.MSELoss()
 classification_criterion = nn.BCELoss()
 
 # Optimizers
-regression_optimizer = optim.Adam(regression_model.parameters(), lr=learning_rate, weight_decay=1e-4)
-classification_optimizer = optim.Adam(classification_model.parameters(), lr=learning_rate, weight_decay=1e-4)
+regression_optimizer = optim.Adam(regression_model.parameters(), lr=learning_rate, weight_decay=0.01)
+classification_optimizer = optim.Adam(classification_model.parameters(), lr=learning_rate, weight_decay=0.01)
 
 # Device setup
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -84,12 +84,22 @@ print(f"Using device: {device}")
 root = tk.Tk()
 root.title("Microscopy Model Training")
 
-fig, ax = plt.subplots(figsize=(6, 4))
-ax.set_xlabel('Epoch')
-ax.set_ylabel('Loss')
-ax.set_title('Training and Validation Loss')
-canvas = FigureCanvasTkAgg(fig, master=root)
-canvas.get_tk_widget().pack()
+plot_frame = Frame(root)
+plot_frame.pack()
+
+fig_reg, ax_reg = plt.subplots(figsize=(4, 3))
+ax_reg.set_xlabel('Epoch')
+ax_reg.set_ylabel('Loss')
+ax_reg.set_title('Regression Loss')
+canvas_reg = FigureCanvasTkAgg(fig_reg, master=plot_frame)
+canvas_reg.get_tk_widget().grid(row=0, column=0)
+
+fig_class, ax_class = plt.subplots(figsize=(4, 3))
+ax_class.set_xlabel('Epoch')
+ax_class.set_ylabel('Loss')
+ax_class.set_title('Classification Loss')
+canvas_class = FigureCanvasTkAgg(fig_class, master=plot_frame)
+canvas_class.get_tk_widget().grid(row=0, column=1)
 
 log_box = scrolledtext.ScrolledText(root, width=50, height=10)
 log_box.pack()
@@ -103,7 +113,7 @@ regression_check.pack()
 classification_check.pack()
 
 
-def train(model, criterion, optimizer, task):
+def train(model, criterion, optimizer, task, ax, canvas):
     train_losses, val_losses = [], []
     for epoch in range(epochs):
         model.train()
@@ -114,7 +124,7 @@ def train(model, criterion, optimizer, task):
 
             outputs = model(images).squeeze()
             if task == 'classification':
-                labels = (labels > 30).float()  # Convert to binary labels (0 or 1)
+                labels = (labels > 30).float()
 
             loss = criterion(outputs, labels)
             loss.backward()
@@ -137,6 +147,12 @@ def train(model, criterion, optimizer, task):
         val_loss /= len(dataloaders['val'])
         val_losses.append(val_loss)
 
+        ax.clear()
+        ax.plot(train_losses, label='Training Loss')
+        ax.plot(val_losses, label='Validation Loss')
+        ax.legend()
+        canvas.draw()
+
         log_box.insert(tk.END,
                        f"{task.upper()} Epoch [{epoch + 1}/{epochs}] - Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}\n")
         log_box.yview(tk.END)
@@ -145,9 +161,10 @@ def train(model, criterion, optimizer, task):
 
 def train_models():
     if train_regression.get():
-        train(regression_model, regression_criterion, regression_optimizer, 'regression')
+        train(regression_model, regression_criterion, regression_optimizer, 'regression', ax_reg, canvas_reg)
     if train_classification.get():
-        train(classification_model, classification_criterion, classification_optimizer, 'classification')
+        train(classification_model, classification_criterion, classification_optimizer, 'classification', ax_class,
+              canvas_class)
 
 
 def test_models():
