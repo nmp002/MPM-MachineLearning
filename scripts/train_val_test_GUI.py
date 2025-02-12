@@ -11,8 +11,10 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 from tkinter import scrolledtext, Checkbutton, IntVar, Frame
 
+
 # Set random seed for reproducibility
 torch.manual_seed(42)
+# see Jesse's git repo for more manual seeds
 
 # Hyperparameters
 batch_size = 16
@@ -20,40 +22,45 @@ epochs = 200
 learning_rate = 1e-8
 
 # Define transformations for training, validation, and test datasets
-train_transform = transforms.Compose([
-    transforms.Resize((512, 512)),
-    transforms.RandomHorizontalFlip(p=0.5),
-    transforms.RandomVerticalFlip(p=0.5),
-    transforms.RandomRotation(degrees=30),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
-    transforms.RandomResizedCrop(size=(512, 512), scale=(0.8, 1.0)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5] * 4, std=[0.5] * 4)
-])
-
-val_test_transform = transforms.Compose([
-    transforms.Resize((512, 512)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5] * 4, std=[0.5] * 4)
-])
+# train_transform = transforms.Compose([
+#     transforms.Resize((512, 512)),
+#     transforms.RandomHorizontalFlip(p=0.5),
+#     transforms.RandomVerticalFlip(p=0.5),
+#     transforms.RandomRotation(degrees=30),
+#     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
+#     transforms.RandomResizedCrop(size=(512, 512), scale=(0.8, 1.0)),
+#     transforms.ToTensor(),
+#     transforms.Normalize(mean=[0.5] * 4, std=[0.5] * 4)
+# ])
+#
+# val_test_transform = transforms.Compose([
+#     transforms.Resize((512, 512)),
+#     transforms.ToTensor(),
+#     transforms.Normalize(mean=[0.5] * 4, std=[0.5] * 4)
+# ])
 
 # Load dataset
-dataset = MicroscopyDataset(
-    csv_file="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/labels.csv",
-    root_dir="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data",
+train_dataset = MicroscopyDataset(
+    csv_file="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/newData/labels.csv",
+    root_dir="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/newData",
+    transform=None
+)
+eval_test_dataset = MicroscopyDataset(
+    csv_file="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/newData/labels.csv",
+    root_dir="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/newData",
     transform=None
 )
 
 # Split dataset
-train_size = int(0.7 * len(dataset))
-val_size = int(0.2 * len(dataset))
-test_size = len(dataset) - train_size - val_size
-train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
+train_size = int(0.7 * len(train_dataset))
+val_size = int(0.2 * len(train_dataset))
+test_size = len(train_dataset) - train_size - val_size
+train_dataset, val_dataset, test_dataset = random_split(train_dataset, [train_size, val_size, test_size])
 
 # Assign transformations to datasets
-train_dataset.dataset.transform = train_transform
-val_dataset.dataset.transform = val_test_transform
-test_dataset.dataset.transform = val_test_transform
+# train_dataset.dataset.transform = train_transform
+# val_dataset.dataset.transform = val_test_transform
+# test_dataset.dataset.transform = val_test_transform
 
 # DataLoaders
 dataloaders = {
@@ -104,7 +111,7 @@ canvas_class.get_tk_widget().grid(row=0, column=1)
 log_box = scrolledtext.ScrolledText(root, width=50, height=10)
 log_box.pack()
 
-# Checkbuttons to select models for training
+# Check buttons to select models for training
 train_regression = IntVar()
 train_classification = IntVar()
 regression_check = Checkbutton(root, text="Train Regression Model", variable=train_regression)
