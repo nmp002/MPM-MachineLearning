@@ -86,7 +86,7 @@ test_dataset.samples = flatten_fovs(test_samples)
 
 
 # Assign transformations to datasets
-# train_dataset.dataset.transform = train_transform
+train_dataset.transform = train_transform
 # val_dataset.dataset.transform = val_test_transform
 # test_dataset.dataset.transform = val_test_transform
 
