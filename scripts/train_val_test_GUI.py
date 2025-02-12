@@ -4,7 +4,7 @@ from models.microscopy_cnn import MicroscopyCNN
 from dataset_loader import MicroscopyDataset
 import torch.optim as optim
 import torch.nn as nn
-from torchvision import transforms
+import random
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -14,7 +14,7 @@ from tkinter import scrolledtext, Checkbutton, IntVar, Frame
 
 # Set random seed for reproducibility
 torch.manual_seed(42)
-# see Jesse's git repo for more manual seeds
+random.seed(42)
 
 # Hyperparameters
 batch_size = 16
@@ -45,17 +45,45 @@ train_dataset = MicroscopyDataset(
     root_dir="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/newData",
     transform=None
 )
-eval_test_dataset = MicroscopyDataset(
+
+# Sample-based dataset splitting
+samples_dict = train_dataset.samples  # Dictionary {sample_id: [list of FOVs]}
+samples_list = list(samples_dict.items())  # Convert to list of tuples
+random.shuffle(samples_list)  # Shuffle to avoid bias
+
+# Compute split sizes
+total_samples = len(samples_list)
+train_size = int(0.7 * total_samples)
+val_size = int(0.2 * total_samples)
+test_size = total_samples - train_size - val_size
+
+# Split data based on sample_id
+train_samples = samples_list[:train_size]
+val_samples = samples_list[train_size:train_size + val_size]
+test_samples = samples_list[train_size + val_size:]
+
+# Function to flatten sample-wise FOVs into a dataset
+def flatten_fovs(sample_list):
+    return [fov for _, fovs in sample_list for fov in fovs]
+
+# Assign FOVs to each dataset
+train_dataset.samples = flatten_fovs(train_samples)
+
+val_dataset = MicroscopyDataset(
     csv_file="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/newData/labels.csv",
     root_dir="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/newData",
     transform=None
 )
+val_dataset.samples = flatten_fovs(val_samples)
 
-# Split dataset
-train_size = int(0.7 * len(train_dataset))
-val_size = int(0.2 * len(train_dataset))
-test_size = len(train_dataset) - train_size - val_size
-train_dataset, val_dataset, test_dataset = random_split(train_dataset, [train_size, val_size, test_size])
+test_dataset = MicroscopyDataset(
+    csv_file="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/newData/labels.csv",
+    root_dir="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/newData",
+    transform=None
+)
+test_dataset.samples = flatten_fovs(test_samples)
+
+
 
 # Assign transformations to datasets
 # train_dataset.dataset.transform = train_transform

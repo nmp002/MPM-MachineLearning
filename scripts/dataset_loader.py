@@ -13,13 +13,14 @@ class MicroscopyDataset(Dataset):
         self.samples = self._get_samples()
 
     def _get_samples(self):
-        samples = []
+        samples = {}
         for _, row in self.data_frame.iterrows():
             sample_id = row['sample_id']
             recurrence_score = row['recurrence_score']
             sample_path = os.path.join(self.root_dir, f"{sample_id}")
 
             if os.path.exists(sample_path):
+                fov_list = []
                 for fov in range(1, 6):
                     fov_dir = os.path.join(sample_path, f"fov{fov}")
                     if os.path.exists(fov_dir):
@@ -29,16 +30,15 @@ class MicroscopyDataset(Dataset):
                         orr_path = os.path.join(fov_dir, "orr.tiff")
 
                         if all(os.path.exists(p) for p in [fad_path, nadh_path, shg_path, orr_path]):
-                            samples.append((fad_path, nadh_path, shg_path, orr_path, recurrence_score))
-                        else:
-                            print(f"Missing images in {fov_dir}")
-                    else:
-                        print(f"Missing FOV directory: {fov_dir}")
+                            fov_list.append((fad_path, nadh_path, shg_path, orr_path, recurrence_score))
+
+                if fov_list:
+                    samples[sample_id] = fov_list  # Store FOVs under the sample ID
             else:
                 print(f"Missing sample directory: {sample_path}")
 
-        print(f"Total samples found: {len(samples)}")
-        return samples
+        print(f"Total unique samples found: {len(samples)}")
+        return samples  # Now returns a dict of sample_id -> list of FOVs
 
     def __len__(self):
         return len(self.samples)
