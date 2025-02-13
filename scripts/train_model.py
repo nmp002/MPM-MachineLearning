@@ -24,7 +24,7 @@ transform = transforms.Compose([
 ])
 
 # Load dataset
-dataset = MicroscopyDataset(csv_file="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/labels.csv",
+dataset = MicroscopyDataset(csv_file="/data/oldData/labels.csv",
                             root_dir="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data",
                             transform=transform)
 

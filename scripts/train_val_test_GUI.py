@@ -5,6 +5,7 @@ from dataset_loader import MicroscopyDataset
 import torch.optim as optim
 import torch.nn as nn
 import random
+import torchvision.transforms.v2 as tvt
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -20,6 +21,11 @@ random.seed(42)
 batch_size = 16
 epochs = 200
 learning_rate = 1e-8
+
+train_transform = tvt.Compose([
+    tvt.RandomVerticalFlip(p=0.25),
+    tvt.RandomHorizontalFlip(p=0.25),
+    tvt.RandomRotation(degrees=(-180, 180))])
 
 # Define transformations for training, validation, and test datasets
 # train_transform = transforms.Compose([
@@ -82,7 +88,6 @@ test_dataset = MicroscopyDataset(
     transform=None
 )
 test_dataset.samples = flatten_fovs(test_samples)
-
 
 
 # Assign transformations to datasets
