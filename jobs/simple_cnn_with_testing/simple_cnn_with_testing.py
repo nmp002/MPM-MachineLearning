@@ -6,7 +6,7 @@ import torch.optim as optim
 import torch.nn as nn
 import random
 import torchvision.transforms.v2 as tvt
-from tqdm import tqdm
+# from tqdm import tqdm
 from scripts.model_metrics import score_model
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -173,7 +173,7 @@ train_losses, val_losses = [], []
 for epoch in range(epochs):
     model.train()
     running_loss = 0.0
-    for images, labels in tqdm(dataloaders['train'], desc=f"{task.upper()} Epoch {epoch + 1}/{epochs}"):
+    for images, labels in dataloaders['train']:
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
 
