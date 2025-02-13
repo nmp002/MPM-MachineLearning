@@ -40,7 +40,7 @@ wait
 cd /scratch/$SLURM_JOB_ID/ || EXIT
 
 echo "Python script initiating..."
-python3 first_simple_CNN.py
+python3 simple_cnn_with_testing
 
 rsync -av -q /scratch/$SLURM_JOB_ID/ $SLURM_SUBMIT_DIR/
 
