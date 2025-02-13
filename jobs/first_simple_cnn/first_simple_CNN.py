@@ -208,6 +208,13 @@ for epoch in range(epochs):
 
         torch.save(classification_model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
 
+        ax = ax_class
+        ax.clear()
+        ax.plot(train_losses, label='Training Loss')
+        ax.plot(val_losses, label='Validation Loss')
+        ax.legend()
+        fig_class.savefig(f'loss_epoch{epoch}.png')
+
     print(f'Epoch{epoch + 1}: validation loss {val_loss}')
     with open(file, 'a') as f:
         f.write(f'Epoch {epoch+1}: val loss {val_loss} \n')
@@ -216,12 +223,8 @@ for epoch in range(epochs):
 
 
 
-ax = ax_class
-ax.clear()
-ax.plot(train_losses, label='Training Loss')
-ax.plot(val_losses, label='Validation Loss')
-ax.legend()
-fig_class.savefig('loss.png')
+
+
 
 df = pd.DataFrame().assign(training_loss=train_losses,validation_loss=val_losses).to_csv('loss.csv', index=True)
 
