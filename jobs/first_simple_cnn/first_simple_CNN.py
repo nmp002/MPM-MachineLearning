@@ -48,8 +48,8 @@ train_transform = tvt.Compose([
 
 # Load dataset
 train_dataset = MicroscopyDataset(
-    csv_file="/data/newData/labels.csv",
-    root_dir="/data/newData",
+    csv_file="data/newData/labels.csv",
+    root_dir="data/newData",
     transform=None
 )
 
@@ -77,15 +77,15 @@ def flatten_fovs(sample_list):
 train_dataset.samples = flatten_fovs(train_samples)
 
 val_dataset = MicroscopyDataset(
-    csv_file="/data/newData/labels.csv",
-    root_dir="/data/newData",
+    csv_file="data/newData/labels.csv",
+    root_dir="data/newData",
     transform=None
 )
 val_dataset.samples = flatten_fovs(val_samples)
 
 test_dataset = MicroscopyDataset(
-    csv_file="/data/newData/labels.csv",
-    root_dir="/data/newData",
+    csv_file="data/newData/labels.csv",
+    root_dir="data/newData",
     transform=None
 )
 test_dataset.samples = flatten_fovs(test_samples)
