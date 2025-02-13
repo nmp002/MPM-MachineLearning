@@ -10,7 +10,7 @@
 #SBATCH --ntasks-per-node=64
 #SBATCH --cpus-per-task=1
 #SBATCH --time=06:00:00
-#SBATCH -qos=gpu
+#SBATCH --qos=gpu
 
 export OMP_NUM_THREADS=1
 
