@@ -28,3 +28,5 @@ tqdm==4.67.1
 typing_extensions==4.12.2
 tzdata==2025.1
 zipp==3.21.0
+
+scikit-learn~=1.6.1
