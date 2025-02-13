@@ -55,6 +55,7 @@ train_dataset = MicroscopyDataset(
 # Sample-based dataset splitting
 samples_dict = train_dataset.samples  # Dictionary {sample_id: [list of FOVs]}
 samples_list = list(samples_dict.items())  # Convert to list of tuples
+print(f"Full sample list: {samples_list}")
 random.shuffle(samples_list)  # Shuffle to avoid bias
 
 # Compute split sizes
@@ -65,8 +66,11 @@ test_size = total_samples - train_size - val_size
 
 # Split data based on sample_id
 train_samples = samples_list[:train_size]
+print(f"trained samples:{train_samples}")
 val_samples = samples_list[train_size:train_size + val_size]
+print(f"val samples:{val_samples}")
 test_samples = samples_list[train_size + val_size:]
+print(f"test samples:{test_samples}")
 
 # Function to flatten sample-wise FOVs into a dataset
 def flatten_fovs(sample_list):
