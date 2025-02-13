@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader, random_split
 from models.microscopy_cnn import MicroscopyCNN
-from dataset_loader import MicroscopyDataset
+from scripts.dataset_loader import MicroscopyDataset
 import torch.optim as optim
 import torch.nn as nn
 import random
@@ -77,8 +77,8 @@ def flatten_fovs(sample_list):
 train_dataset.samples = flatten_fovs(train_samples)
 
 val_dataset = MicroscopyDataset(
-    csv_file="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/newData/labels.csv",
-    root_dir="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/newData",
+    csv_file="/data/newData/labels.csv",
+    root_dir="/data/newData",
     transform=None
 )
 val_dataset.samples = flatten_fovs(val_samples)
