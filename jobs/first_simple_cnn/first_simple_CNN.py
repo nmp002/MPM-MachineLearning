@@ -204,7 +204,7 @@ for epoch in range(epochs):
         with open(file, 'a') as f:
             f.write(f'New best at epoch {epoch+1} with val loss {val_loss} \n')
 
-    if epoch+1%250 == 0:
+    if (epoch+1)%250 == 0:
 
         torch.save(classification_model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
 
