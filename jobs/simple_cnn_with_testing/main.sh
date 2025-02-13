@@ -20,6 +20,8 @@ module load python/anaconda-3.14
 
 # activate venv
 conda activate /home/nmp002/.conda/envs/np_env
+echo $CONDA_DEFAULT_ENV
+echo $CONDA_PREFIX
 echo $SLURM_JOB_ID
 
 cd $SLURM_SUBMIT_DIR || exit
