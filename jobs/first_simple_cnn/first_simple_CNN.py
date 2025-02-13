@@ -202,7 +202,7 @@ for epoch in range(epochs):
         print(f'New best at epoch {epoch+1} with val loss {val_loss}')
 
         with open(file, 'a') as f:
-            f.write(f'New best at epoch {epoch+1} with val loss {val_loss}')
+            f.write(f'New best at epoch {epoch+1} with val loss {val_loss} \n')
 
     if epoch+1%250 == 0:
 
@@ -210,7 +210,7 @@ for epoch in range(epochs):
 
     print(f'Epoch{epoch + 1}: validation loss {val_loss}')
     with open(file, 'a') as f:
-        f.write(f'Epoch {epoch+1}: val loss {val_loss}')
+        f.write(f'Epoch {epoch+1}: val loss {val_loss} \n')
 
 
 
