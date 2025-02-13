@@ -31,9 +31,9 @@ mkdir /scratch/$SLURM_JOB_ID/data
 rsync -avq $files /scratch/$SLURM_JOB_ID/data
 rsync -avq $SLURM_SUBMIT_DIR/first_simple_CNN.py /scratch/$SLURM_JOB_ID
 mkdir /scratch/$SLURM_JOB_ID/models
-rsync - avq /home/nmp002/HighlandsMachineLearning/models/micrsocopy_cnn.py /scratch/$SLURM_JOB_ID/models
+rsync -avq /home/nmp002/MPM-MachineLearning/models/micrsocopy_cnn.py /scratch/$SLURM_JOB_ID/models
 mkdir /scratch/$SLURM_JOB_ID/scripts
-rsync -avq /home/nmp002/HighlandsMachineLearning/scripts/dataset_loader.py /scratch/$SLURM_JOB_ID/scripts
+rsync -avq /home/nmp002/MPM-MachineLearning/scripts/dataset_loader.py /scratch/$SLURM_JOB_ID/scripts
 wait
 
 cd /scratch/$SLURM_JOB_ID/ || EXIT
