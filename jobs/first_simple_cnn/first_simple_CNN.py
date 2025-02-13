@@ -11,9 +11,9 @@ from scripts.model_metrics import score_model
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import tkinter as tk
-from tkinter import scrolledtext, Checkbutton, IntVar, Frame
+# from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+# import tkinter as tk
+# from tkinter import scrolledtext, Checkbutton, IntVar, Frame
 
 
 # Set random seed for reproducibility
