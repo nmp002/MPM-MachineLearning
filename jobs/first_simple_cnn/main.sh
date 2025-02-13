@@ -22,23 +22,26 @@ module load python/anaconda-3.14
 conda activate /home/nmp002/.conda/envs/np_env
 echo $SLURM_JOB_ID
 
-cd $SLURM_JOB_DIR || exit
+cd $SLURM_SUBMIT_DIR || exit
 # input files needed for job
-files=/home/nmp002/data/Highlands_Data_for_ML
+files=/home/nmp002/data/Highlands_Data_for_ML/newData
 
 echo "Copying files..."
 mkdir /scratch/$SLURM_JOB_ID/data
 rsync -avq $files /scratch/$SLURM_JOB_ID/data
-rsync -avq $SLURM_JOB_DIR/first_simply_CNN.py /scratch/$SLURM_JOB_ID
-rsync - avq /home/nmp002/HighlandsMachineLearning/my_modules /scratch/$SLURM_JOB_ID
+rsync -avq $SLURM_SUBMIT_DIR/first_simple_CNN.py /scratch/$SLURM_JOB_ID
+mkdir /scratch/$SLURM_JOB_ID/models
+rsync - avq /home/nmp002/HighlandsMachineLearning/models/micrsocopy_cnn.py /scratch/$SLURM_JOB_ID/models
+mkdir /scratch/$SLURM_JOB_ID/scripts
+rsync -avq /home/nmp002/HighlandsMachineLearning/scripts/dataset_loader.py /scratch/$SLURM_JOB_ID/scripts
 wait
 
 cd /scratch/$SLURM_JOB_ID/ || EXIT
 
 echo "Python script initiating..."
-python3 first_simply_CNN.py
+python3 first_simple_CNN.py
 
-rsync -av -q /scratch/$SLURM_JOB_ID/ $SLURM_JOB_DIR/.rnd
+rsync -av -q /scratch/$SLURM_JOB_ID/ $SLURM_SUBMIT_DIR/
 
 # check if rsync succeeded
 if [ $? -ne 0 ]; then
