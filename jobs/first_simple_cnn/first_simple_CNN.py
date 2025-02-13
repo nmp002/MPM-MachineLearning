@@ -7,10 +7,10 @@ import torch.nn as nn
 import random
 import torchvision.transforms.v2 as tvt
 from tqdm import tqdm
+from scripts.model_metrics import score_model
 import matplotlib.pyplot as plt
 import pandas as pd
-from sklearn.metrics import precision_recall_curve, PrecisionRecallDisplay, average_precision_score, roc_curve, auc, \
-    accuracy_score, balanced_accuracy_score, RocCurveDisplay, confusion_matrix, ConfusionMatrixDisplay, roc_auc_score
+
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 from tkinter import scrolledtext, Checkbutton, IntVar, Frame
@@ -168,16 +168,6 @@ optimizer = classification_optimizer
 criterion = classification_criterion
 task = 'classification'
 
-def score_model(model, loader, loss_fn=None, print_results=False, make_plot=False, threshold_type='none'):
-    def make_the_plots():
-        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 5))
-        RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=scores['ROC-AUC']).plot(ax=ax1)
-        ax1.set_title('ROC')
-        PrecisionRecallDisplay.from_predictions(targets, outs).plot(ax=ax2)
-        ax2.set_title('Precision Recall Curve')
-        ConfusionMatrixDisplay.from_predictions(targets, preds).plot(ax=ax3)
-        ax3.set_title('Confusion Matrix')
-        return fig
 
 train_losses, val_losses = [], []
 for epoch in range(epochs):
@@ -241,10 +231,6 @@ for epoch in range(epochs):
     print(f'Epoch{epoch + 1}: validation loss {val_loss}')
     with open(file, 'a') as f:
         f.write(f'Epoch {epoch+1}: val loss {val_loss} \n')
-
-
-
-
 
 
 
