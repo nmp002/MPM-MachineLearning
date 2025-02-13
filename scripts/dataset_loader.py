@@ -1,6 +1,5 @@
 import torch
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms
+from torch.utils.data import Dataset
 import tifffile as tiff
 import pandas as pd
 import os
@@ -78,26 +77,4 @@ class MicroscopyDataset(Dataset):
         return combined_image, label_tensor
 
 
-# Define transformations
-transform = transforms.Compose([
-    transforms.Resize((512, 512)),  # Resize to 512x512
-    transforms.Normalize(mean=[0.5] * 4, std=[0.5] * 4)  # Normalize
-])
 
-# Create dataset and dataloader
-dataset = MicroscopyDataset(
-    csv_file="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/newData/labels.csv",
-    root_dir="C:/Users/nmp002/PycharmProjects/HighlandsMachineLearning/data/newData",
-    transform=transform
-)
-
-print(f"Number of samples in dataset: {len(dataset)}")
-
-dataloader = DataLoader(dataset, batch_size=8, shuffle=True)
-
-# Test loading data
-if __name__ == "__main__":
-    for images, labels in dataloader:
-        print("Image batch shape:", images.shape)  # Check the shape of the image tensor
-        print("Labels batch:", labels)  # Check the corresponding labels
-        break
