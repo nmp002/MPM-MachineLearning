@@ -21,7 +21,7 @@ random.seed(42)
 # Hyperparameters
 batch_size = 16
 epochs = 2500
-learning_rate = 1e-8
+learning_rate = 1e-4
 
 train_transform = tvt.Compose([
     tvt.RandomVerticalFlip(p=0.25),
