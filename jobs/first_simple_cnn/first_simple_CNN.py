@@ -9,6 +9,8 @@ import torchvision.transforms.v2 as tvt
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import pandas as pd
+from sklearn.metrics import precision_recall_curve, PrecisionRecallDisplay, average_precision_score, roc_curve, auc, \
+    accuracy_score, balanced_accuracy_score, RocCurveDisplay, confusion_matrix, ConfusionMatrixDisplay, roc_auc_score
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 from tkinter import scrolledtext, Checkbutton, IntVar, Frame
@@ -166,6 +168,17 @@ optimizer = classification_optimizer
 criterion = classification_criterion
 task = 'classification'
 
+def score_model(model, loader, loss_fn=None, print_results=False, make_plot=False, threshold_type='none'):
+    def make_the_plots():
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 5))
+        RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=scores['ROC-AUC']).plot(ax=ax1)
+        ax1.set_title('ROC')
+        PrecisionRecallDisplay.from_predictions(targets, outs).plot(ax=ax2)
+        ax2.set_title('Precision Recall Curve')
+        ConfusionMatrixDisplay.from_predictions(targets, preds).plot(ax=ax3)
+        ax3.set_title('Confusion Matrix')
+        return fig
+
 train_losses, val_losses = [], []
 for epoch in range(epochs):
     model.train()
@@ -210,6 +223,13 @@ for epoch in range(epochs):
     if (epoch+1)%250 == 0:
 
         torch.save(classification_model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
+
+        model = classification_model
+        model.load_state_dict(torch.load(f"classification_model_epoch{epoch+1}.pt"))
+        scores,fig = score_model(model, test_dataset,print_results=True, make_plot=True, threshold_type='roc')
+        fig.savefig(f'Epoch_{epoch+1}_test_plot.png')
+        plt.close(fig)
+
 
         ax = ax_class
         ax.clear()
