@@ -187,15 +187,16 @@ for epoch in range(epochs):
             f.write(f'New best at epoch {epoch+1} with val loss {val_loss} \n')
 
     if (epoch+1)%250 == 0:
-
+        # Save the trained model every 250 epochs
         torch.save(classification_model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
 
+        # Test the trained model every 250 epochs
         model.load_state_dict(torch.load(f"classification_model_epoch{epoch+1}.pt"))
         scores,fig = score_model(model, dataloaders['test'],print_results=True, make_plot=True, threshold_type='roc')
         fig.savefig(f'Epoch_{epoch+1}_test_plot.png')
         plt.close(fig)
 
-
+        # Create training/val loss figure every 250 epochs
         ax = ax_class
         ax.clear()
         ax.plot(train_losses, label='Training Loss')
@@ -203,9 +204,13 @@ for epoch in range(epochs):
         ax.legend()
         fig_class.savefig(f'loss_epoch{epoch}.png')
 
+    # Print training/val loss every epoch
     print(f'Epoch{epoch + 1}: validation loss {val_loss}')
+    print(f'Epoch{epoch + 1}: training loss {train_loss}')
+    # and write them to "results.txt"
     with open(file, 'a') as f:
         f.write(f'Epoch {epoch+1}: val loss {val_loss} \n')
+        f.write(f'Epoch {epoch+1}: train loss {train_loss} \n')
 
 
 
