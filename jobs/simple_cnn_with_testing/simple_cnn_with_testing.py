@@ -93,10 +93,9 @@ test_dataset = MicroscopyDataset(
 test_dataset.samples = flatten_fovs(test_samples)
 
 
-# Assign transformations to datasets
+# Assign transformations to training dataset
 train_dataset.transform = train_transform
-# val_dataset.dataset.transform = val_test_transform
-# test_dataset.dataset.transform = val_test_transform
+
 
 # DataLoaders
 dataloaders = {
@@ -210,31 +209,3 @@ for epoch in range(epochs):
 
 df = pd.DataFrame().assign(training_loss=train_losses,validation_loss=val_losses).to_csv('loss.csv', index=True)
 
-    # canvas.draw()
-
-    # log_box.insert(tk.END,
-    #                f"{task.upper()} Epoch [{epoch + 1}/{epochs}] - Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}\n")
-    # log_box.yview(tk.END)
-    # root.update()
-
-
-# def train_models():
-#     if train_regression.get():
-#         train(regression_model, regression_criterion, regression_optimizer, 'regression', ax_reg, canvas_reg)
-#     if train_classification.get():
-#         train(classification_model, classification_criterion, classification_optimizer, 'classification', ax_class,
-#               canvas_class)
-
-
-# def test_models():
-#     log_box.insert(tk.END, "Testing models...\n")
-#     log_box.yview(tk.END)
-
-
-# train_button = tk.Button(root, text="Train Selected Models", command=train_models)
-# train_button.pack()
-#
-# test_button = tk.Button(root, text="Test Models", command=test_models)
-# test_button.pack()
-
-# root.mainloop()
