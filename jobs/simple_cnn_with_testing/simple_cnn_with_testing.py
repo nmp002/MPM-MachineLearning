@@ -1,5 +1,5 @@
 import torch
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 from models.microscopy_cnn import MicroscopyCNN
 from scripts.dataset_loader import MicroscopyDataset
 import torch.optim as optim
