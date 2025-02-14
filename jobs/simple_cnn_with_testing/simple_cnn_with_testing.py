@@ -198,7 +198,7 @@ for epoch in range(epochs):
         ax.plot(train_losses, label='Training Loss')
         ax.plot(val_losses, label='Validation Loss')
         ax.legend()
-        fig_class.savefig(f'loss_epoch{epoch}.png')
+        fig_class.savefig(f'loss_epoch{epoch+1}.png')
 
     # Print training/val loss every epoch
     print(f'Epoch{epoch + 1}: validation loss {val_loss}')
