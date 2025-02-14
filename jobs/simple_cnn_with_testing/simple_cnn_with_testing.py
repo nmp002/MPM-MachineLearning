@@ -6,15 +6,11 @@ import torch.optim as optim
 import torch.nn as nn
 import random
 import torchvision.transforms.v2 as tvt
-# from tqdm import tqdm
 from scripts.model_metrics import score_model
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-# import tkinter as tk
-# from tkinter import scrolledtext, Checkbutton, IntVar, Frame
-
+##------------------------------------------------------------##
 
 # Set random seed for reproducibility
 torch.manual_seed(42)
@@ -25,28 +21,11 @@ batch_size = 16
 epochs = 2500
 learning_rate = 1e-4
 
+# Transformations for training set
 train_transform = tvt.Compose([
     tvt.RandomVerticalFlip(p=0.25),
     tvt.RandomHorizontalFlip(p=0.25),
     tvt.RandomRotation(degrees=(-180, 180))])
-
-# Define transformations for training, validation, and test datasets
-# train_transform = transforms.Compose([
-#     transforms.Resize((512, 512)),
-#     transforms.RandomHorizontalFlip(p=0.5),
-#     transforms.RandomVerticalFlip(p=0.5),
-#     transforms.RandomRotation(degrees=30),
-#     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
-#     transforms.RandomResizedCrop(size=(512, 512), scale=(0.8, 1.0)),
-#     transforms.ToTensor(),
-#     transforms.Normalize(mean=[0.5] * 4, std=[0.5] * 4)
-# ])
-#
-# val_test_transform = transforms.Compose([
-#     transforms.Resize((512, 512)),
-#     transforms.ToTensor(),
-#     transforms.Normalize(mean=[0.5] * 4, std=[0.5] * 4)
-# ])
 
 # Load dataset
 train_dataset = MicroscopyDataset(
@@ -55,10 +34,19 @@ train_dataset = MicroscopyDataset(
     transform=None
 )
 
+# Create a file to store the results
+file = 'results.txt'
+with open(file, 'w') as f:
+    f.write('Results \n')
+
 # Sample-based dataset splitting
 samples_dict = train_dataset.samples  # Dictionary {sample_id: [list of FOVs]}
 samples_list = list(samples_dict.items())  # Convert to list of tuples
-print(f"Full sample list: {samples_list}")
+print(f"Full sample list: {samples_list}")  # Print to output
+
+with open(file, 'a') as f:
+    f.write(f'Full sample list: {samples_list}\n')  # Write to results
+
 random.shuffle(samples_list)  # Shuffle to avoid bias
 
 # Compute split sizes
@@ -69,11 +57,20 @@ test_size = total_samples - train_size - val_size
 
 # Split data based on sample_id
 train_samples = samples_list[:train_size]
-print(f"trained samples:{train_samples}")
+print(f"Training samples:{train_samples}")
+with open(file, 'a') as f:
+    f.write(f'Training samples: {train_samples}\n')  # Write to results
+
 val_samples = samples_list[train_size:train_size + val_size]
-print(f"val samples:{val_samples}")
+print(f"Validation samples:{val_samples}")
+with open(file, 'a') as f:
+    f.write(f'Validation samples: {val_samples}\n')  # Write to results
+
 test_samples = samples_list[train_size + val_size:]
-print(f"test samples:{test_samples}")
+print(f"Test samples:{test_samples}")
+with open(file, 'a') as f:
+    f.write(f'Test samples: {test_samples}\n')  # Write to results
+
 # Function to flatten sample-wise FOVs into a dataset
 def flatten_fovs(sample_list):
     return [fov for _, fovs in sample_list for fov in fovs]
@@ -127,41 +124,18 @@ print(f"Using device: {device}")
 regression_optimizer = optim.Adam(regression_model.parameters(), lr=learning_rate, weight_decay=0.01)
 classification_optimizer = optim.Adam(classification_model.parameters(), lr=learning_rate, weight_decay=0.01)
 
-# GUI setup
-# root = tk.Tk()
-# root.title("Microscopy Model Training")
-#
-# plot_frame = Frame(root)
-# plot_frame.pack()
-#
-# fig_reg, ax_reg = plt.subplots(figsize=(4, 3))
-# ax_reg.set_xlabel('Epoch')
-# ax_reg.set_ylabel('Loss')
-# ax_reg.set_title('Regression Loss')
-# canvas_reg = FigureCanvasTkAgg(fig_reg, master=plot_frame)
-# canvas_reg.get_tk_widget().grid(row=0, column=0)
-#
+
 fig_class, ax_class = plt.subplots(figsize=(4, 3))
 ax_class.set_xlabel('Epoch')
 ax_class.set_ylabel('Loss')
 ax_class.set_title('Classification Loss')
-# canvas_class = FigureCanvasTkAgg(fig_class, master=plot_frame)
-# canvas_class.get_tk_widget().grid(row=0, column=1)
-#
-# log_box = scrolledtext.ScrolledText(root, width=50, height=10)
-# log_box.pack()
 
-# Check buttons to select models for training
+
+# Define models for training
 train_regression = 0
 train_classification = 1
-# regression_check = Checkbutton(root, text="Train Regression Model", variable=train_regression)
-# classification_check = Checkbutton(root, text="Train Classification Model", variable=train_classification)
-# regression_check.pack()
-# classification_check.pack()
 
-file = 'results.txt'
-with open(file, 'w') as f:
-    f.write('Results \n')
+
 
 model = classification_model
 optimizer = classification_optimizer
