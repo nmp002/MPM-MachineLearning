@@ -5,11 +5,12 @@ import pandas as pd
 import os
 
 class MicroscopyDataset(Dataset):
-    def __init__(self, csv_file, root_dir, transform=None):
+    def __init__(self, csv_file, root_dir,  label='classification', transform=None):
         self.data_frame = pd.read_csv(csv_file)
         self.root_dir = root_dir
         self.transform = transform
         self.samples = self._get_samples()
+        self.label = label
 
     def _get_samples(self):
         samples = {}
@@ -60,8 +61,9 @@ class MicroscopyDataset(Dataset):
 
         # Combine all images into a single 4-channel image
         combined_image = torch.cat([fad_tensor, nadh_tensor, shg_tensor, orr_tensor], dim=0)
-        combined_image = torch.clamp(combined_image, 0, 1)
-        combined_image = torch.nan_to_num(combined_image, nan=0.0, posinf=1.0, neginf=0.0)
+        # combined_image = torch.clamp(combined_image, 0, 1)
+        # combined_image = torch.nan_to_num(combined_image, nan=0.0, posinf=1.0, neginf=0.0)
+        combined_image[torch.isnan(combined_image)] = 0
 
         # Check for NaN values inside data
         if torch.isnan(combined_image).any() or torch.isinf(combined_image).any():
@@ -73,6 +75,9 @@ class MicroscopyDataset(Dataset):
 
         # Ensure the label is a tensor
         label_tensor = torch.tensor(label, dtype=torch.float)
+
+        if self.label == 'classification':
+            label_tensor = 1 if label_tensor > 30 else 0
 
         return combined_image, label_tensor
 
