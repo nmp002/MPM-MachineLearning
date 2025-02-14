@@ -141,6 +141,9 @@ optimizer = classification_optimizer
 criterion = classification_criterion
 task = 'classification'
 
+x = model(torch.rand(5,4,512,512))
+print(x.shape)
+print(x)
 
 train_losses, val_losses = [], []
 for epoch in range(epochs):
