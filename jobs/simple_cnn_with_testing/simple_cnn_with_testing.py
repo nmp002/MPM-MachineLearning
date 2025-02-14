@@ -188,7 +188,7 @@ for epoch in range(epochs):
         torch.save(classification_model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
 
         model.load_state_dict(torch.load(f"classification_model_epoch{epoch+1}.pt"))
-        scores,fig = score_model(model, test_dataset,print_results=True, make_plot=True, threshold_type='roc')
+        scores,fig = score_model(model, dataloaders['test'],print_results=True, make_plot=True, threshold_type='roc')
         fig.savefig(f'Epoch_{epoch+1}_test_plot.png')
         plt.close(fig)
 
