@@ -1,6 +1,6 @@
 import torch
+from torch.nn import BCELoss
 from torch.utils.data import DataLoader
-from scripts.loss_functions import FocalLoss
 from models.microscopy_cnn import MicroscopyCNN
 from scripts.dataset_loader import MicroscopyDataset
 import torch.optim as optim
@@ -144,7 +144,7 @@ classification_model = MicroscopyCNN(task='classification')
 
 # Loss functions
 regression_criterion = nn.MSELoss()
-classification_criterion = FocalLoss()
+classification_criterion = nn.BCELoss()
 
 
 # Device setup
