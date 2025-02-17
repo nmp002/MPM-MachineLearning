@@ -66,6 +66,7 @@ high_score_samples = high_samples_list
 
 # Create an expanded samples list
 expanded_samples_list = samples_list + high_samples_list
+random.shuffle(expanded_samples_list)
 
 # Function to flatten sample-wise FOVs into a dataset
 def flatten_fovs(sample_list):
@@ -85,6 +86,7 @@ full_dataset.samples = flatten_fovs(samples_list)
 full_dataset.transform = train_transform
 
 full_dataset.samples = high_score_dataset.samples + full_dataset.samples
+
 
 # Compute split sizes
 total_samples = len(expanded_samples_list)
