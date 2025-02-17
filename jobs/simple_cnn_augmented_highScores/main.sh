@@ -37,6 +37,7 @@ rsync -avq /home/nmp002/MPM-MachineLearning/models/microscopy_cnn.py /scratch/$S
 mkdir /scratch/$SLURM_JOB_ID/scripts
 rsync -avq /home/nmp002/MPM-MachineLearning/scripts/dataset_loader.py /scratch/$SLURM_JOB_ID/scripts
 rsync -avq /home/nmp002/MPM-MachineLearning/scripts/model_metrics.py /scratch/$SLURM_JOB_ID/scripts
+rsync -avq /home/nmp002/MPM-MachineLearning/scripts/loss_function.py /scratch/$SLURM_JOB_ID/scripts
 wait
 
 cd /scratch/$SLURM_JOB_ID/ || EXIT
