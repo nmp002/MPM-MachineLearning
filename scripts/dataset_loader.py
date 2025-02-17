@@ -11,6 +11,7 @@ class MicroscopyDataset(Dataset):
         self.transform = transform
         self.samples = self._get_samples()
         self.label = label
+        self.recurrence_scores = self._get_recurrence_scores()
 
     def _get_samples(self):
         samples = {}
@@ -42,6 +43,14 @@ class MicroscopyDataset(Dataset):
 
     def __len__(self):
         return len(self.samples)
+
+    def _get_recurrence_scores(self):
+        """ Creates a dictionary mapping sample_id to its recurrence score"""
+        recurrence_scores = {}
+        for sample_id, fov_list in self.samples.items():
+            if fov_list:
+                recurrence_scores[sample_id] = fov_list[0][4]
+        return recurrence_scores
 
     def tiff_to_tensor(self, file_path):
         img = tiff.imread(file_path)
