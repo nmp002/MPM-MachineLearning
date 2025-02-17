@@ -1,5 +1,4 @@
 import torch
-from torch.nn import BCELoss
 from torch.utils.data import DataLoader
 from models.microscopy_cnn import MicroscopyCNN
 from scripts.dataset_loader import MicroscopyDataset
