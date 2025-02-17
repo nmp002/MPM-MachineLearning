@@ -1,8 +1,5 @@
 import torch
 from torch.utils.data import DataLoader
-from torch.utils.data import ConcatDataset
-
-from notebooks.artificalDataExpansion import expanded_samples_list
 from scripts.loss_functions import FocalLoss
 from models.microscopy_cnn import MicroscopyCNN
 from scripts.dataset_loader import MicroscopyDataset
