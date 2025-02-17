@@ -1,5 +1,8 @@
 import torch
 from torch.utils.data import DataLoader
+from torch.utils.data import ConcatDataset
+
+from notebooks.artificalDataExpansion import expanded_samples_list
 from scripts.loss_functions import FocalLoss
 from models.microscopy_cnn import MicroscopyCNN
 from scripts.dataset_loader import MicroscopyDataset
@@ -28,39 +31,20 @@ train_transform = tvt.Compose([
     tvt.RandomHorizontalFlip(p=0.25),
     tvt.RandomRotation(degrees=(-180, 180))])
 
-# Define augmentation transforms
-# augment_transform = tvt.Compose([
-#     tvt.RandomVerticalFlip(p=0.5),
-#     tvt.RandomHorizontalFlip(p=0.5),
-#     tvt.RandomRotation(degrees=(-180, 180)),
-#     tvt.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
-# ])
+# Transforms for artificial expansion of high-score data
+augment_transform = tvt.Compose([
+    tvt.RandomVerticalFlip(p=0.5),
+    tvt.RandomHorizontalFlip(p=0.5),
+    tvt.RandomRotation(degrees=(-180, 180)),
+    tvt.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
+])
 
-# Load dataset
-train_dataset = MicroscopyDataset(
-    csv_file="data/newData/labels.csv",
-    root_dir="data/newData",
+# Load full dataset
+full_dataset = MicroscopyDataset(
+    csv_file=r"C:\Users\nmp002\PycharmProjects\HighlandsMachineLearning\data\newData/labels.csv",
+    root_dir=r"C:\Users\nmp002\PycharmProjects\HighlandsMachineLearning\data\newData",
     transform=None
 )
-
-# Separate high-score and low-score samples
-# samples_high = [sample for sample in train_dataset.samples if sample['label'] >30]
-# samples_low = [sample for sample in train_dataset.samples if sample['label'] <=30]
-
-# Duplicate high samples
-# samples_high_augmented = []
-# for sample in samples_high:
-#     for _ in range(2):  # Duplicate 2 times
-#         sample_augmented = sample.copy()
-#         sample_augmented['image'] = augment_transform(sample['image'])
-#         samples_high_augmented.append(sample_augmented)
-
-# combine balanced dataset
-# balanced_samples = samples_low + samples_high + samples_high_augmented
-
-# assign new samples to training dataset
-# train_dataset.samples = balanced_samples
-# train_dataset.transform = train_transform   # apply standard transformations
 
 # Create a file to store the results
 file = 'results.txt'
@@ -68,61 +52,86 @@ with open(file, 'w') as f:
     f.write('Results \n')
 
 # Sample-based dataset splitting
-samples_dict = train_dataset.samples  # Dictionary {sample_id: [list of FOVs]}
+samples_dict = full_dataset.samples  # Dictionary {sample_id: [list of FOVs]}
 samples_list = list(samples_dict.items())  # Convert to list of tuples
-print(f"Full sample list: {samples_list}")  # Print to output
 
-with open(file, 'a') as f:
-    f.write(f'Full sample list: {samples_list}\n')  # Write to results
+# Create a dictionary to hold all samples with high recurrence scores (30 or greater)
+high_samples_dict = {}
+# Iterate through sample_dict
+for sample_id, sample_data in samples_dict.items():
+    if sample_id in full_dataset.data_frame['sample_id'].values:
+        score = full_dataset.data_frame.loc[full_dataset.data_frame['sample_id'] == sample_id, 'score_range'].values[0]
+        if score == 'high':
+            high_samples_dict[sample_id] = sample_data # Copy to new dictionary
 
-random.shuffle(samples_list)  # Shuffle to avoid bias
+high_samples_list = list(high_samples_dict.items())
+high_score_samples = high_samples_list
 
-# Compute split sizes
-total_samples = len(samples_list)
-train_size = int(0.7 * total_samples)
-val_size = int(0.2 * total_samples)
-test_size = total_samples - train_size - val_size
-
-# Split data based on sample_id
-train_samples = samples_list[:train_size]
-print(f"Training samples:{train_samples}")
-with open(file, 'a') as f:
-    f.write(f'Training samples: {train_samples}\n')  # Write to results
-
-val_samples = samples_list[train_size:train_size + val_size]
-print(f"Validation samples:{val_samples}")
-with open(file, 'a') as f:
-    f.write(f'Validation samples: {val_samples}\n')  # Write to results
-
-test_samples = samples_list[train_size + val_size:]
-print(f"Test samples:{test_samples}")
-with open(file, 'a') as f:
-    f.write(f'Test samples: {test_samples}\n')  # Write to results
+# Create an expanded samples list
+expanded_samples_list = samples_list + high_samples_list
 
 # Function to flatten sample-wise FOVs into a dataset
 def flatten_fovs(sample_list):
     return [fov for _, fovs in sample_list for fov in fovs]
 
-# Assign FOVs to each dataset
+high_score_dataset = MicroscopyDataset(
+    csv_file="data/newData/labels.csv",
+    root_dir="data/newData",
+    transform=None
+)
+
+# Augment the high-scoring samples
+high_score_dataset.samples = flatten_fovs(high_score_samples)
+high_score_dataset.transform = augment_transform
+
+full_dataset.samples = flatten_fovs(samples_list)
+full_dataset.transform = train_transform
+
+full_dataset.samples = high_score_dataset.samples + full_dataset.samples
+
+# Compute split sizes
+total_samples = len(expanded_samples_list)
+train_size = int(0.7105 * total_samples)
+val_size = int(0.1842 * total_samples)
+test_size = total_samples - train_size - val_size
+
+# Split data based on sample_id
+train_samples = expanded_samples_list[:train_size]
+print(f"Training samples:{train_samples}")
+with open(file, 'a') as f:
+    f.write(f'Training samples: {train_samples}\n')  # Write to results
+
+val_samples = expanded_samples_list[train_size:train_size + val_size]
+print(f"Validation samples:{val_samples}")
+with open(file, 'a') as f:
+    f.write(f'Validation samples: {val_samples}\n')  # Write to results
+
+test_samples = expanded_samples_list[train_size + val_size:]
+print(f"Test samples:{test_samples}")
+with open(file, 'a') as f:
+    f.write(f'Test samples: {test_samples}\n')  # Write to results
+
+
+train_dataset = MicroscopyDataset(
+    csv_file=r"C:\Users\nmp002\PycharmProjects\HighlandsMachineLearning\data\newData/labels.csv",
+    root_dir=r"C:\Users\nmp002\PycharmProjects\HighlandsMachineLearning\data\newData",
+    transform=None
+)
 train_dataset.samples = flatten_fovs(train_samples)
 
 val_dataset = MicroscopyDataset(
-    csv_file="data/newData/labels.csv",
-    root_dir="data/newData",
+    csv_file=r"C:\Users\nmp002\PycharmProjects\HighlandsMachineLearning\data\newData/labels.csv",
+    root_dir=r"C:\Users\nmp002\PycharmProjects\HighlandsMachineLearning\data\newData",
     transform=None
 )
 val_dataset.samples = flatten_fovs(val_samples)
 
 test_dataset = MicroscopyDataset(
-    csv_file="data/newData/labels.csv",
-    root_dir="data/newData",
+    csv_file=r"C:\Users\nmp002\PycharmProjects\HighlandsMachineLearning\data\newData/labels.csv",
+    root_dir=r"C:\Users\nmp002\PycharmProjects\HighlandsMachineLearning\data\newData",
     transform=None
 )
 test_dataset.samples = flatten_fovs(test_samples)
-
-
-# Assign transformations to training dataset
-train_dataset.transform = train_transform
 
 
 # DataLoaders
