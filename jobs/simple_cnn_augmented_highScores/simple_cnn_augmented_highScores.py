@@ -66,6 +66,7 @@ high_score_samples = [(sample_id + "_aug", score) for sample_id, score in high_s
 
 # Create an expanded samples list
 expanded_samples_list = samples_list + high_score_samples
+random.shuffle(expanded_samples_list)   # shuffle to avoid bias
 
 # Function to flatten sample-wise FOVs into a dataset
 def flatten_fovs(sample_list):
