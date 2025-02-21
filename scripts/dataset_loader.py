@@ -17,7 +17,7 @@ class MicroscopyDataset(Dataset):
         for _, row in self.data_frame.iterrows():
             sample_id = row['sample_id']
             recurrence_score = row['recurrence_score']
-            score_range = row['score_range']
+            # score_range = row['score_range']
             sample_path = os.path.join(self.root_dir, f"{sample_id}")
 
             if os.path.exists(sample_path):
@@ -78,7 +78,7 @@ class MicroscopyDataset(Dataset):
         label_tensor = torch.tensor(label, dtype=torch.float)
 
         if self.label == 'classification':
-            label_tensor = 1 if label_tensor > 30 else 0
+            label_tensor = 1 if label_tensor >= 30 else 0
 
         return combined_image, label_tensor
 
