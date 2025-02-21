@@ -98,17 +98,23 @@ test_size = total_samples - train_size - val_size
 train_samples = expanded_samples_list[:train_size]
 print(f"Training samples:{train_samples}")
 with open(file, 'a') as f:
-    f.write(f'Training samples: {train_samples}\n')  # Write to results
+    f.write('Training samples:')
+    for sample_id, sample_data in train_samples:
+        f.write(f' {sample_id} |')  # Write which samples are used in training to results
 
 val_samples = expanded_samples_list[train_size:train_size + val_size]
 print(f"Validation samples:{val_samples}")
 with open(file, 'a') as f:
-    f.write(f'Validation samples: {val_samples}\n')  # Write to results
+    f.write('Validation samples:')
+    for sample_id, sample_data in val_samples:
+        f.write(f' {sample_id} |')  # samples in validation
 
 test_samples = expanded_samples_list[train_size + val_size:]
 print(f"Test samples:{test_samples}")
 with open(file, 'a') as f:
-    f.write(f'Test samples: {test_samples}\n')  # Write to results
+    f.write('Test samples:')
+    for sample_id, sample_data in test_samples:
+        f.write(f' {sample_id} |')  # samples in testing
 
 
 train_dataset = MicroscopyDataset(
