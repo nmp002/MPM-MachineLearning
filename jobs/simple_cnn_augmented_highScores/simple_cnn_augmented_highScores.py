@@ -61,11 +61,11 @@ for sample_id, sample_data in samples_dict.items():
             high_samples_dict[sample_id] = sample_data # Copy to new dictionary
 
 high_samples_list = list(high_samples_dict.items())
-high_score_samples = high_samples_list
+# Add "aug" extension to prevent repeat data labels
+high_score_samples = [(sample_id + "_aug", score) for sample_id, score in high_samples_list]
 
 # Create an expanded samples list
-expanded_samples_list = samples_list + high_samples_list
-random.shuffle(expanded_samples_list)
+expanded_samples_list = samples_list + high_score_samples
 
 # Function to flatten sample-wise FOVs into a dataset
 def flatten_fovs(sample_list):
