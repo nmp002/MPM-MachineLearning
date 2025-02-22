@@ -189,6 +189,7 @@ criterion = classification_criterion
 task = 'classification'
 
 train_losses, val_losses = [], []
+best_loss = 100
 for epoch in range(epochs):
     model.train()
     running_loss = 0.0
