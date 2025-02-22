@@ -101,6 +101,7 @@ with open(file, 'a') as f:
     f.write('Training samples:')
     for sample_id, sample_data in train_samples:
         f.write(f' {sample_id} |')  # Write which samples are used in training to results
+    f.write('\n\n')
 
 val_samples = expanded_samples_list[train_size:train_size + val_size]
 print(f"Validation samples:{val_samples}")
@@ -108,6 +109,7 @@ with open(file, 'a') as f:
     f.write('Validation samples:')
     for sample_id, sample_data in val_samples:
         f.write(f' {sample_id} |')  # samples in validation
+    f.write('\n\n')
 
 test_samples = expanded_samples_list[train_size + val_size:]
 print(f"Test samples:{test_samples}")
@@ -115,6 +117,7 @@ with open(file, 'a') as f:
     f.write('Test samples:')
     for sample_id, sample_data in test_samples:
         f.write(f' {sample_id} |')  # samples in testing
+    f.write(f'\n\n{"-" * 100} \n\n')
 
 
 train_dataset = MicroscopyDataset(
