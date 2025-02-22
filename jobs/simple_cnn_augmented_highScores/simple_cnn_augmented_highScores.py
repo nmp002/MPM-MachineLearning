@@ -14,7 +14,7 @@ import pandas as pd
 
 # Set random seed for reproducibility
 torch.manual_seed(42)
-random.seed(42)
+random.seed(40)
 
 # Hyperparameters
 batch_size = 16
