@@ -29,17 +29,10 @@ train_transform = tvt.Compose([
     tvt.RandomHorizontalFlip(p=0.25),
     tvt.RandomRotation(degrees=(-180, 180))])
 
-# Transforms for artificial expansion of high-score data
-augment_transform = tvt.Compose([
-    tvt.RandomVerticalFlip(p=0.5),
-    tvt.RandomHorizontalFlip(p=0.5),
-    tvt.RandomRotation(degrees=(-180, 180)),
-    tvt.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
-])
 
 # Load full dataset
 full_dataset = MicroscopyDataset(
-    csv_file="data/newData/labels.csv",
+    csv_file="data/newData/correct_labels.csv",
     root_dir="data/newData",
     transform=None
 )
@@ -52,52 +45,25 @@ with open(file, 'w') as f:
 # Sample-based dataset splitting
 samples_dict = full_dataset.samples  # Dictionary {sample_id: [list of FOVs]}
 samples_list = list(samples_dict.items())  # Convert to list of tuples
-
-# Create a dictionary to hold all samples with high recurrence scores (30 or greater)
-high_samples_dict = {}
-# Iterate through sample_dict
-for sample_id, sample_data in samples_dict.items():
-    if sample_id in full_dataset.data_frame['sample_id'].values:
-        score = full_dataset.data_frame.loc[full_dataset.data_frame['sample_id'] == sample_id, 'score_range'].values[0]
-        if score == 'high':
-            high_samples_dict[sample_id] = sample_data # Copy to new dictionary
-
-high_samples_list = list(high_samples_dict.items())
-# Add "aug" extension to prevent repeat data labels
-high_score_samples = [(sample_id + "_aug", score) for sample_id, score in high_samples_list]
-
-# Create an expanded samples list
-expanded_samples_list = samples_list + high_score_samples
-random.shuffle(expanded_samples_list)   # shuffle to avoid bias
+random.shuffle(samples_list)   # shuffle to avoid bias
 
 # Function to flatten sample-wise FOVs into a dataset
 def flatten_fovs(sample_list):
     return [fov for _, fovs in sample_list for fov in fovs]
 
-high_score_dataset = MicroscopyDataset(
-    csv_file="data/newData/labels.csv",
-    root_dir="data/newData",
-    transform=None
-)
-
-# Augment the high-scoring samples
-high_score_dataset.samples = flatten_fovs(high_score_samples)
-high_score_dataset.transform = augment_transform
 
 full_dataset.samples = flatten_fovs(samples_list)
 full_dataset.transform = train_transform
 
-full_dataset.samples = high_score_dataset.samples + full_dataset.samples
-
 
 # Compute split sizes
-total_samples = len(expanded_samples_list)
-train_size = int(0.7105 * total_samples)
-val_size = int(0.1842 * total_samples)
+total_samples = len(samples_list)
+train_size = int(0.7 * total_samples)
+val_size = int(0.2 * total_samples)
 test_size = total_samples - train_size - val_size
 
 # Split data based on sample_id
-train_samples = expanded_samples_list[:train_size]
+train_samples = samples_list[:train_size]
 print(f"Training samples:{train_samples}")
 with open(file, 'a') as f:
     f.write('**Training samples:**')
@@ -105,7 +71,7 @@ with open(file, 'a') as f:
         f.write(f' {sample_id} |')  # Write which samples are used in training to results
     f.write('\n\n')
 
-val_samples = expanded_samples_list[train_size:train_size + val_size]
+val_samples = samples_list[train_size:train_size + val_size]
 print(f"Validation samples:{val_samples}")
 with open(file, 'a') as f:
     f.write('**Validation samples:**')
@@ -113,7 +79,7 @@ with open(file, 'a') as f:
         f.write(f' {sample_id} |')  # samples in validation
     f.write('\n\n')
 
-test_samples = expanded_samples_list[train_size + val_size:]
+test_samples = samples_list[train_size + val_size:]
 print(f"Test samples:{test_samples}")
 with open(file, 'a') as f:
     f.write('**Test samples**:')
@@ -123,21 +89,21 @@ with open(file, 'a') as f:
 
 
 train_dataset = MicroscopyDataset(
-    csv_file="data/newData/labels.csv",
+    csv_file="data/newData/correct_labels.csv",
     root_dir="data/newData",
     transform=None
 )
 train_dataset.samples = flatten_fovs(train_samples)
 
 val_dataset = MicroscopyDataset(
-    csv_file="data/newData/labels.csv",
+    csv_file="data/newData/correct_labels.csv",
     root_dir="data/newData",
     transform=None
 )
 val_dataset.samples = flatten_fovs(val_samples)
 
 test_dataset = MicroscopyDataset(
-    csv_file="data/newData/labels.csv",
+    csv_file="data/newData/correct_labels.csv",
     root_dir="data/newData",
     transform=None
 )
