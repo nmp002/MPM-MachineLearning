@@ -45,9 +45,9 @@ full_dataset = MicroscopyDataset(
 )
 
 # Create a file to store the results
-file = 'results.txt'
+file = 'results.md'
 with open(file, 'w') as f:
-    f.write('Results \n')
+    f.write('Results \n\n')
 
 # Sample-based dataset splitting
 samples_dict = full_dataset.samples  # Dictionary {sample_id: [list of FOVs]}
@@ -250,7 +250,7 @@ for epoch in range(epochs):
     # Print training/val loss every epoch
     print(f'Epoch{epoch + 1}: validation loss {val_loss}')
     print(f'Epoch{epoch + 1}: training loss {train_loss}')
-    # and write them to "results.txt"
+    # and write them to "results.md"
     with open(file, 'a') as f:
         f.write(f'Epoch {epoch+1}: val loss {val_loss} \n')
         f.write(f'Epoch {epoch+1}: train loss {train_loss} \n')
