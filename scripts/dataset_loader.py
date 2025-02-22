@@ -78,7 +78,7 @@ class MicroscopyDataset(Dataset):
         label_tensor = torch.tensor(label, dtype=torch.float)
 
         if self.label == 'classification':
-            label_tensor = 1 if label_tensor >= 30 else 0
+            label_tensor = 1 if label_tensor >= 25 else 0
 
         return combined_image, label_tensor
 
