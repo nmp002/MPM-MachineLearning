@@ -47,7 +47,7 @@ full_dataset = MicroscopyDataset(
 # Create a file to store the results
 file = 'results.md'
 with open(file, 'w') as f:
-    f.write('Results \n\n')
+    f.write('**Results** \n\n')
 
 # Sample-based dataset splitting
 samples_dict = full_dataset.samples  # Dictionary {sample_id: [list of FOVs]}
@@ -100,7 +100,7 @@ test_size = total_samples - train_size - val_size
 train_samples = expanded_samples_list[:train_size]
 print(f"Training samples:{train_samples}")
 with open(file, 'a') as f:
-    f.write('Training samples:')
+    f.write('**Training samples:**')
     for sample_id, sample_data in train_samples:
         f.write(f' {sample_id} |')  # Write which samples are used in training to results
     f.write('\n\n')
@@ -108,7 +108,7 @@ with open(file, 'a') as f:
 val_samples = expanded_samples_list[train_size:train_size + val_size]
 print(f"Validation samples:{val_samples}")
 with open(file, 'a') as f:
-    f.write('Validation samples:')
+    f.write('**Validation samples:**')
     for sample_id, sample_data in val_samples:
         f.write(f' {sample_id} |')  # samples in validation
     f.write('\n\n')
@@ -116,7 +116,7 @@ with open(file, 'a') as f:
 test_samples = expanded_samples_list[train_size + val_size:]
 print(f"Test samples:{test_samples}")
 with open(file, 'a') as f:
-    f.write('Test samples:')
+    f.write('**Test samples**:')
     for sample_id, sample_data in test_samples:
         f.write(f' {sample_id} |')  # samples in testing
     f.write(f'\n\n{"-" * 100} \n\n')
@@ -227,7 +227,7 @@ for epoch in range(epochs):
         print(f'New best at epoch {epoch+1} with val loss {val_loss}')
 
         with open(file, 'a') as f:
-            f.write(f'New best at epoch {epoch+1} with val loss {val_loss} \n')
+            f.write(f'New best at epoch **{epoch+1}** with val loss **{val_loss}** \n')
 
     if (epoch+1)%250 == 0:
         # Save the trained model every 250 epochs
@@ -252,8 +252,8 @@ for epoch in range(epochs):
     print(f'Epoch{epoch + 1}: training loss {train_loss}')
     # and write them to "results.md"
     with open(file, 'a') as f:
-        f.write(f'Epoch {epoch+1}: val loss {val_loss} \n')
-        f.write(f'Epoch {epoch+1}: train loss {train_loss} \n')
+        f.write(f'Epoch {epoch+1}: **val loss {val_loss}** \n')
+        f.write(f'Epoch {epoch+1}: **train loss {train_loss}** \n')
 
 
 
