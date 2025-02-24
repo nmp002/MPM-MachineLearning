@@ -9,6 +9,8 @@ import torchvision.transforms.v2 as tvt
 from scripts.model_metrics import score_model
 import matplotlib.pyplot as plt
 import pandas as pd
+from collections import defaultdict
+import torch.nn.functional as F
 
 ##------------------------------------------------------------##
 
@@ -184,17 +186,45 @@ for epoch in range(epochs):
     train_losses.append(train_loss)
 
     model.eval()
+    sample_predictions = defaultdict(list)
+    sample_labels = {}
     val_loss = 0.0
     with torch.no_grad():
-        for images, labels in dataloaders['val']:
+        for images, labels, sample_ids in dataloaders['val']:
             images, labels = images.to(device), labels.to(device)
             outputs = model(images).squeeze()
+            preds = torch.sigmoid(outputs).cpu().numpy()
+
+            # Store predictions and true labels by sample_id
+            for i, sample_id in enumerate(sample_ids):
+                sample_predictions[sample_id].append(preds[i])
+                sample_labels[sample_id] = labels[i].item()
+
+            # Calculate loss at the FOV level (optional)
             if task == 'classification':
-                labels = (labels > 30).float()
+                labels = (labels >= 30).float()
             loss = criterion(outputs, labels)
             val_loss += loss.item()
+
+    # Average predictions at the sample level
+    final_preds = []
+    final_labels = []
+
+    for sample_id, preds in sample_predictions.items():
+        # Aggregate FOV predictions for the sample
+        avg_pred = sum(preds) / len(preds)
+        final_preds.append(1 if avg_pred >= 0.5 else 0)  # Threshold at 0.5
+        final_labels.append(1 if sample_labels[sample_id] >= 30 else 0)
+
+    # Calculate accuracy at the sample level
+    final_preds = torch.tensor(final_preds)
+    final_labels = torch.tensor(final_labels)
+    val_accuracy = (final_preds == final_labels).sum().item() / len(final_labels)
+
     val_loss /= len(dataloaders['val'])
     val_losses.append(val_loss)
+
+    print(f'Validation Loss: {val_loss}, Validation Accuracy: {val_accuracy}')
 
     if epoch == 0 or val_loss < best_loss:
         best_loss = val_loss
@@ -204,14 +234,65 @@ for epoch in range(epochs):
         with open(file, 'a') as f:
             f.write(f'New best at epoch **{epoch+1}** with val loss **{val_loss}** \n')
 
-    if (epoch+1)%250 == 0:
+    if (epoch + 1) % 250 == 0:
         # Save the trained model every 250 epochs
-        torch.save(classification_model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
+        torch.save(classification_model.state_dict(), f"classification_model_epoch{epoch + 1}.pt")
 
         # Test the trained model every 250 epochs
-        model.load_state_dict(torch.load(f"classification_model_epoch{epoch+1}.pt"))
-        scores,fig = score_model(model, dataloaders['test'],print_results=True, make_plot=True, threshold_type='roc')
-        fig.savefig(f'Epoch_{epoch+1}_test_plot.png')
+        model.load_state_dict(torch.load(f"classification_model_epoch{epoch + 1}.pt"))
+        model.eval()
+
+        sample_predictions = defaultdict(list)
+        sample_labels = {}
+        test_loss = 0.0
+
+        with torch.no_grad():
+            for images, labels, sample_ids in dataloaders['test']:
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images).squeeze()
+                preds = torch.sigmoid(outputs).cpu().numpy()
+
+                # Store predictions and true labels by sample_id
+                for i, sample_id in enumerate(sample_ids):
+                    sample_predictions[sample_id].append(preds[i])
+                    sample_labels[sample_id] = labels[i].item()
+
+                # Calculate loss at the FOV level (optional)
+                if task == 'classification':
+                    labels = (labels >= 30).float()
+                loss = criterion(outputs, labels)
+                test_loss += loss.item()
+
+        # Average predictions at the sample level
+        final_preds = []
+        final_labels = []
+
+        for sample_id, preds in sample_predictions.items():
+            # Aggregate FOV predictions for the sample
+            avg_pred = sum(preds) / len(preds)
+            final_preds.append(1 if avg_pred >= 0.5 else 0)  # Threshold at 0.5
+            final_labels.append(1 if sample_labels[sample_id] >= 30 else 0)
+
+        # Calculate accuracy at the sample level
+        final_preds = torch.tensor(final_preds)
+        final_labels = torch.tensor(final_labels)
+        test_accuracy = (final_preds == final_labels).sum().item() / len(final_labels)
+
+        test_loss /= len(dataloaders['test'])
+
+        print(f'Epoch {epoch + 1}: Test Loss: {test_loss}, Test Accuracy: {test_accuracy}')
+
+        # Save test results
+        with open(file, 'a') as f:
+            f.write(f'Epoch {epoch + 1}: **Test Loss {test_loss}**, **Test Accuracy {test_accuracy}** \n')
+
+        # Optional: Plot and save ROC curve or other metrics
+        # If you want to save plots, you can modify this section as needed
+        fig, ax = plt.subplots()
+        ax.plot(final_preds, label='Predictions')
+        ax.plot(final_labels, label='True Labels')
+        ax.legend()
+        fig.savefig(f'Epoch_{epoch + 1}_test_plot_sample_level.png')
         plt.close(fig)
 
         # Create training/val loss figure every 250 epochs
