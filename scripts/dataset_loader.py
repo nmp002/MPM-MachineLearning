@@ -5,12 +5,13 @@ import pandas as pd
 import os
 
 class MicroscopyDataset(Dataset):
-    def __init__(self, csv_file, root_dir,  label='classification', transform=None):
+    def __init__(self, csv_file, root_dir,  channels=['fad','nadh','shg','orr'], label='classification', transform=None):
         self.data_frame = pd.read_csv(csv_file)
         self.root_dir = root_dir
         self.transform = transform
         self.samples = self._get_samples()
         self.label = label
+        self.channels = channels
 
     def _get_samples(self):
         samples = {}
@@ -55,15 +56,17 @@ class MicroscopyDataset(Dataset):
         fad_path, nadh_path, shg_path, orr_path, label = self.samples[idx]
 
         # Load images as tensors
-        fad_tensor = self.tiff_to_tensor(fad_path)
-        nadh_tensor = self.tiff_to_tensor(nadh_path)
-        shg_tensor = self.tiff_to_tensor(shg_path)
-        orr_tensor = self.tiff_to_tensor(orr_path)
+        image_tensors = {
+            'fad': self.tiff_to_tensor(fad_path),
+            'nadh': self.tiff_to_tensor(nadh_path),
+            'shg': self.tiff_to_tensor(shg_path),
+            'orr': self.tiff_to_tensor(orr_path)
+        }
 
-        # Combine all images into a single 4-channel image
-        combined_image = torch.cat([fad_tensor, nadh_tensor, shg_tensor, orr_tensor], dim=0)
-        # combined_image = torch.clamp(combined_image, 0, 1)
-        # combined_image = torch.nan_to_num(combined_image, nan=0.0, posinf=1.0, neginf=0.0)
+        # Combine selected channels into a single image
+        selected_tensors = [image_tensors[channel] for channel in self.channels]
+        combined_image = torch.cat(selected_tensors, dim=0)
+
         combined_image[torch.isnan(combined_image)] = 0
 
         # Check for NaN values inside data
