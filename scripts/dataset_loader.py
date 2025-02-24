@@ -32,7 +32,7 @@ class MicroscopyDataset(Dataset):
                         orr_path = os.path.join(fov_dir, "orr.tiff")
 
                         if all(os.path.exists(p) for p in [fad_path, nadh_path, shg_path, orr_path]):
-                            fov_list.append((fad_path, nadh_path, shg_path, orr_path, recurrence_score))
+                            fov_list.append((sample_id, fad_path, nadh_path, shg_path, orr_path, recurrence_score))
 
                 if fov_list:
                     samples[sample_id] = fov_list  # Store FOVs under the sample ID
@@ -53,7 +53,7 @@ class MicroscopyDataset(Dataset):
         return img_tensor
 
     def __getitem__(self, idx):
-        fad_path, nadh_path, shg_path, orr_path, label = self.samples[idx]
+        sample_id, fad_path, nadh_path, shg_path, orr_path, label = self.samples[idx]
 
         # Load images as tensors
         image_tensors = {
@@ -83,7 +83,7 @@ class MicroscopyDataset(Dataset):
         if self.label == 'classification':
             label_tensor = 1 if label_tensor >= 25 else 0
 
-        return combined_image, label_tensor
+        return combined_image, label_tensor, sample_id
 
 
 
