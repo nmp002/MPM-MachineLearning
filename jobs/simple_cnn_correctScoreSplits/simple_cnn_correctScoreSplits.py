@@ -16,7 +16,7 @@ plt.close('all')
 
 # Set random seed for reproducibility
 torch.manual_seed(42)
-random.seed(40) # changed from 42 to 40
+random.seed(42) # changed from 42 to 40
 
 # Hyperparameters
 batch_size = 16
