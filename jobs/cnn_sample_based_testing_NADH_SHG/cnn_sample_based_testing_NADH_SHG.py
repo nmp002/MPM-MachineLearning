@@ -169,7 +169,7 @@ best_loss = 100
 for epoch in range(epochs):
     model.train()
     running_loss = 0.0
-    for images, labels in dataloaders['train']:
+    for images, labels, sample_ids in dataloaders['train']:
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
 
