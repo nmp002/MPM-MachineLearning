@@ -175,7 +175,7 @@ for epoch in range(epochs):
 
         outputs = model(images).squeeze()
         if task == 'classification':
-            labels = (labels >= 30).float()
+            labels = (labels > 25).float()
 
         loss = criterion(outputs, labels)
         loss.backward()
@@ -202,7 +202,7 @@ for epoch in range(epochs):
 
             # Calculate loss at the FOV level (optional)
             if task == 'classification':
-                labels = (labels >= 30).float()
+                labels = (labels > 25).float()
             loss = criterion(outputs, labels)
             val_loss += loss.item()
 
@@ -214,7 +214,7 @@ for epoch in range(epochs):
         # Aggregate FOV predictions for the sample
         avg_pred = sum(preds) / len(preds)
         final_preds.append(1 if avg_pred >= 0.5 else 0)  # Threshold at 0.5
-        final_labels.append(1 if sample_labels[sample_id] >= 30 else 0)
+        final_labels.append(1 if sample_labels[sample_id] >25 else 0)
 
     # Calculate accuracy at the sample level
     final_preds = torch.tensor(final_preds)
@@ -259,19 +259,21 @@ for epoch in range(epochs):
 
                 # Calculate loss at the FOV level (optional)
                 if task == 'classification':
-                    labels = (labels >= 30).float()
+                    labels = (labels > 25).float()
                 loss = criterion(outputs, labels)
                 test_loss += loss.item()
 
         # Average predictions at the sample level
         final_preds = []
         final_labels = []
+        final_probs = []  # Store probabilities for ROC curve
 
         for sample_id, preds in sample_predictions.items():
             # Aggregate FOV predictions for the sample
             avg_pred = sum(preds) / len(preds)
+            final_probs.append(avg_pred)  # Keep probability for ROC curve
             final_preds.append(1 if avg_pred >= 0.5 else 0)  # Threshold at 0.5
-            final_labels.append(1 if sample_labels[sample_id] >= 30 else 0)
+            final_labels.append(1 if sample_labels[sample_id] > 25 else 0)
 
         # Calculate accuracy at the sample level
         final_preds = torch.tensor(final_preds)
@@ -286,12 +288,32 @@ for epoch in range(epochs):
         with open(file, 'a') as f:
             f.write(f'Epoch {epoch + 1}: **Test Loss {test_loss}**, **Test Accuracy {test_accuracy}** \n')
 
-        # Optional: Plot and save ROC curve or other metrics
-        # If you want to save plots, you can modify this section as needed
-        fig, ax = plt.subplots()
-        ax.plot(final_preds, label='Predictions')
-        ax.plot(final_labels, label='True Labels')
-        ax.legend()
+
+        # Manually override the model outputs with the aggregated Sample-level predictions
+        class CustomDatasetWrapper(torch.utils.data.Dataset):
+            def __init__(self, final_probs, final_labels):
+                self.final_probs = final_probs
+                self.final_labels = final_labels
+
+            def __len__(self):
+                return len(self.final_probs)
+
+            def __getitem__(self, idx):
+                return torch.tensor(self.final_probs[idx]), torch.tensor(self.final_labels[idx])
+
+
+        # Create a custom dataloader with the aggregated Sample-level predictions
+        sample_level_dataset = CustomDatasetWrapper(final_probs, final_labels)
+        sample_level_dataloader = DataLoader(sample_level_dataset, batch_size=batch_size, shuffle=False)
+
+        # Call score_model as usual, using the Sample-level predictions
+        scores, fig = score_model(
+            model=model,
+            loader=sample_level_dataloader,
+            print_results=True,
+            make_plot=True,
+            threshold_type='roc'
+        )
         fig.savefig(f'Epoch_{epoch + 1}_test_plot_sample_level.png')
         plt.close(fig)
 
