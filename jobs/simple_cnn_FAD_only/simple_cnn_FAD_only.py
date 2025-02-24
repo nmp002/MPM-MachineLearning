@@ -16,6 +16,7 @@ plt.close('all')
 
 # Choose which channels to use for input
 input_channels = ['fad'] # Options: 'fad', 'nadh', 'shg', 'orr'
+in_channels = len(input_channels)
 
 # Set random seed for reproducibility
 torch.manual_seed(42)
@@ -125,8 +126,8 @@ dataloaders = {
 }
 
 # Initialize models
-regression_model = MicroscopyCNN(task='regression')
-classification_model = MicroscopyCNN(task='classification')
+regression_model = MicroscopyCNN(in_channels=in_channels, task='regression')
+classification_model = MicroscopyCNN(in_channels=in_channels, task='classification')
 
 # Loss functions
 regression_criterion = nn.MSELoss()
