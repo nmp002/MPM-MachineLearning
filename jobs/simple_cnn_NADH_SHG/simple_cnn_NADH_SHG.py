@@ -173,7 +173,7 @@ for epoch in range(epochs):
 
         outputs = model(images).squeeze()
         if task == 'classification':
-            labels = (labels >= 30).float()
+            labels = (labels > 25).float()
 
         loss = criterion(outputs, labels)
         loss.backward()
@@ -190,7 +190,7 @@ for epoch in range(epochs):
             images, labels = images.to(device), labels.to(device)
             outputs = model(images).squeeze()
             if task == 'classification':
-                labels = (labels > 30).float()
+                labels = (labels > 25).float()
             loss = criterion(outputs, labels)
             val_loss += loss.item()
     val_loss /= len(dataloaders['val'])
