@@ -166,6 +166,7 @@ optimizer = classification_optimizer
 criterion = classification_criterion
 task = 'classification'
 
+# Function to calculate scores and plot roc curve/confusion matrix
 def score_em(t, o):
     fpr, tpr, thresholds = roc_curve(t, o)
     test_score = auc(fpr, tpr)
