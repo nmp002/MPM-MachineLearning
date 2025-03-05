@@ -116,7 +116,7 @@ test_data = torch.utils.data.Subset(full_dataset, test_indices)
 dataloaders = {
     'train': DataLoader(train_data, batch_size=batch_size, shuffle=True),
     'val': DataLoader(val_data, batch_size=batch_size, shuffle=False),
-    'test': DataLoader(test_data, batch_size=batch_size, shuffle=False)
+    'test': DataLoader(test_data, batch_size=len(test_data), shuffle=False)
 }
 
 # Initialize models
@@ -220,21 +220,10 @@ for epoch in range(epochs):
 
         with torch.no_grad():
             model.eval()
-            targets = []
-            outs = []
-            for i in test_samples:
-                for sample_path in full_dataset.sample_wise_paths[i]:
-                    fov_outs = []
-                    if sample_path:
-                        for fov in sample_path:
-                            # De-nest fov paths and get the indexed item path
-                            score = fov[1]
-                            combined_image = torch.cat([tiff_to_tensor(channel) for channel in fov[0]], dim=0).unsqueeze(0)
-                            y = model(combined_image).item()
-                            fov_outs.append(y)
-                        targets.append(1 if score > 25 else 0)
-                        outs.append(np.min(fov_outs))
-        score_em(targets, outs)
+            for img, targets in dataloaders['test']:
+                y = model(img).cpu().squeeze()
+
+        score_em(targets, y)
 
 
         # Create training/val loss figure every 250 epochs
