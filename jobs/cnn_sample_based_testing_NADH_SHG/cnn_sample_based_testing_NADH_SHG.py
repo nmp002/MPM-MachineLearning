@@ -53,7 +53,7 @@ with open(file, 'w') as f:
 
 # Sample-based dataset splitting
 samples_list = full_dataset.sample_wise_paths
-random.shuffle(samples_list)   # shuffle to avoid bias
+# random.shuffle(samples_list)   # shuffle to avoid bias
 full_dataset.transform = train_transform
 
 
