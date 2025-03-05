@@ -220,10 +220,12 @@ for epoch in range(epochs):
 
         with torch.no_grad():
             model.eval()
+
             for img, targets in dataloaders['test']:
                 img = img.to(device)
                 y = model(img).cpu().squeeze()
 
+        targets = [1 if t > 25 else 0 for t in targets]
         score_em(targets, y)
 
 
