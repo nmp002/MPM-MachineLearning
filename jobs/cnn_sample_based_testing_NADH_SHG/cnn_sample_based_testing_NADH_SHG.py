@@ -88,7 +88,7 @@ with open(file, 'a') as f:
         f.write(f"Sample_{(id_num+1):03} |")  # samples in validation
     f.write('\n\n')
 
-test_samples = samples_list[train_size + val_size:]
+test_samples = indices[train_size + val_size:]
 print(f"Test samples:")
 for id_num in test_samples:
     print(f"Sample_{(id_num+1):03}")
