@@ -19,7 +19,7 @@ import numpy as np
 plt.close('all')
 
 # Choose which channels to use for input
-input_channels = ['fad','nadh','shg','orr'] # Options: 'fad', 'nadh', 'shg', 'orr'
+input_channels = ['nadh','shg'] # Options: 'fad', 'nadh', 'shg', 'orr'
 in_channels = len(input_channels)
 
 # Set random seed for reproducibility
