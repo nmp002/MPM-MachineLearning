@@ -222,7 +222,7 @@ for epoch in range(epochs):
             model.eval()
             targets = []
             outs = []
-            for sample in test_data:
+            for sample in full_dataset.sample_wise_paths[test_samples]:
                 fov_outs = []
                 if sample:
                     for fov in sample:
