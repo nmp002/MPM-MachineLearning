@@ -226,6 +226,7 @@ for epoch in range(epochs):
                 y = model(img).cpu().squeeze()
 
         targets = [1 if t > 25 else 0 for t in targets]
+        y = y.numpy().astype(np.float64).tolist()
         score_em(targets, y)
 
 
