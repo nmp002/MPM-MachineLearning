@@ -64,8 +64,7 @@ val_size = int(0.2 * total_samples)
 test_size = total_samples - train_size - val_size
 
 indices = torch.utils.data.SubsetRandomSampler(range(len(samples_list)))
-print(f"Samples list: {samples_list}")
-print(f"Indices: {indices}")
+indices = [i for i in indices]
 
 # Split data based on sample_id
 train_samples = indices[:train_size]
