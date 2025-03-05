@@ -29,7 +29,7 @@ random.seed(40) # changed from 42 to 40
 # Hyperparameters
 batch_size = 16
 epochs = 500
-learning_rate = 1e-6
+learning_rate = 1e-4
 
 # Transformations for training set
 train_transform = tvt.Compose([
