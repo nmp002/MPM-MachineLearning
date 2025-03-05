@@ -47,21 +47,18 @@ class MicroscopyDataset(Dataset):
 
     def __getitem__(self, index):
         # De-nest fov paths and get the indexed item path
-        channel_paths, score = [p for path in self.sample_wise_paths for p in path][index]
+        channel_paths, score = self._denest()[index]
         combined_image = torch.cat([tiff_to_tensor(channel) for channel in channel_paths], dim=0)
         return combined_image, score
 
+    def _denest(self):
+        return [p for path in self.sample_wise_paths for p in path]
 
     def __len__(self):
         return self.sample_n
 
-    def get_sample_subset(self, sample_id):
-        if isinstance(sample_id, int):
-            sample_id = self.data_frame.iloc[sample_id]
-        indices = []
-        for i, sample_path in enumerate(self.sample_wise_paths):
-            if sample_id in sample_path:
-                indices.append(i)
+    def get_sample_images(self, sample_id):
+        indices = self.get_sample_indices(sample_id)
         sample_images = []
         score = None
         for index in indices:
@@ -69,7 +66,11 @@ class MicroscopyDataset(Dataset):
             sample_images.append(img)
         return sample_images, score
 
-
-
-
-
+    def get_sample_indices(self, sample_id):
+        if isinstance(sample_id, int):
+            sample_id = self.data_frame['sample_id'].iloc[sample_id]
+        indices = []
+        for i, fov_path in enumerate(self._denest()):
+            if sample_id in fov_path[0][0]:
+                indices.append(i)
+        return indices
