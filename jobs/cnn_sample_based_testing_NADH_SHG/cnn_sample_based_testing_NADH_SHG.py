@@ -63,39 +63,62 @@ train_size = int(0.7 * total_samples)
 val_size = int(0.2 * total_samples)
 test_size = total_samples - train_size - val_size
 
+
+
 indices = torch.utils.data.SubsetRandomSampler(range(len(samples_list)))
 indices = [i for i in indices]
 
 # Split data based on sample_id
-train_samples = indices[:train_size]
+# train_samples = indices[:train_size]
+train_samples = [18, 14, 10, 22, 21, 6, 5, 12, 11, 15, 9, 24, 19, 28, 1, 13, 2, 17]
 print(f"Train samples: {train_samples}")
 print(f"Training samples:")
 for id_num in train_samples:
-    print(f"Sample_{(id_num+1):03}")
+    if id_num >=20:
+        print(f"Sample_{(id_num+2):03}")
+    else:
+        print(f"Sample_{(id_num+1):03}")
 with open(file, 'a') as f:
     f.write('**Training samples:**')
     for id_num in train_samples:
-        f.write(f" Sample_{(id_num+1):03} |")  # Write which samples are used in training to results
+        if id_num >= 20:
+            f.write(f" Sample_{(id_num+2):03} |")  # Write which samples are used in training to results
+        else:
+            f.write(f" Sample_{(id_num+1):03} |")
     f.write('\n\n')
 
-val_samples = indices[train_size:train_size + val_size]
+# val_samples = indices[train_size:train_size + val_size]
+val_samples = [27, 4, 25, 7, 8]
 print(f"Validation samples:")
 for id_num in val_samples:
-    print(f"Sample_{(id_num+1):03}")
+    if id_num >= 20:
+        print(f"Sample_{(id_num+2):03}")
+    else:
+        print(f"Sample_{(id_num+1):03}")
 with open(file, 'a') as f:
     f.write('**Validation samples:**')
     for id_num in val_samples:
-        f.write(f" Sample_{(id_num+1):03} |")  # samples in validation
+        if id_num >= 20:
+            f.write(f" Sample_{(id_num+2):03} |")  # samples in validation
+        else:
+            f.write(f" Sample_{(id_num+1):03} |")
     f.write('\n\n')
 
-test_samples = indices[train_size + val_size:]
+# test_samples = indices[train_size + val_size:]
+test_samples = [23, 0, 3, 20]
 print(f"Test samples:")
 for id_num in test_samples:
-    print(f"Sample_{(id_num+1):03}")
+    if id_num >= 20:
+        print(f"Sample_{(id_num+2):03}")
+    else:
+        print(f"Sample_{(id_num+1):03}")
 with open(file, 'a') as f:
     f.write('**Test samples**:')
     for id_num in test_samples:
-        f.write(f' Sample_{(id_num+1):03} |')  # samples in testing
+        if id_num >= 20:
+            f.write(f' Sample_{(id_num+2):03} |')  # samples in testing
+        else:
+            f.write(f" Sample_{(id_num+1):03} |")
     f.write(f'\n\n{"-" * 100} \n\n')
 
 
