@@ -75,7 +75,7 @@ for id_num in train_samples:
 with open(file, 'a') as f:
     f.write('**Training samples:**')
     for id_num in train_samples:
-        f.write(f"Sample_{(id_num+1):03} |")  # Write which samples are used in training to results
+        f.write(f" Sample_{(id_num+1):03} |")  # Write which samples are used in training to results
     f.write('\n\n')
 
 val_samples = indices[train_size:train_size + val_size]
@@ -85,7 +85,7 @@ for id_num in val_samples:
 with open(file, 'a') as f:
     f.write('**Validation samples:**')
     for id_num in val_samples:
-        f.write(f"Sample_{(id_num+1):03} |")  # samples in validation
+        f.write(f" Sample_{(id_num+1):03} |")  # samples in validation
     f.write('\n\n')
 
 test_samples = indices[train_size + val_size:]
@@ -95,7 +95,7 @@ for id_num in test_samples:
 with open(file, 'a') as f:
     f.write('**Test samples**:')
     for id_num in test_samples:
-        f.write(f'Sample_{(id_num+1):03} |')  # samples in testing
+        f.write(f' Sample_{(id_num+1):03} |')  # samples in testing
     f.write(f'\n\n{"-" * 100} \n\n')
 
 
