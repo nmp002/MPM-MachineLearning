@@ -53,7 +53,7 @@ with open(file, 'w') as f:
 
 # Sample-based dataset splitting
 samples_list = full_dataset.sample_wise_paths
-# random.shuffle(samples_list)   # shuffle to avoid bias
+random.shuffle(samples_list)   # shuffle to avoid bias
 full_dataset.transform = train_transform
 
 
@@ -63,9 +63,8 @@ train_size = int(0.7 * total_samples)
 val_size = int(0.2 * total_samples)
 test_size = total_samples - train_size - val_size
 
-# indices = torch.utils.data.SubsetRandomSampler(range(len(samples_list)))
-# indices = [i for i in indices]
-indices = list(range(total_samples))
+indices = torch.utils.data.SubsetRandomSampler(range(len(samples_list)))
+indices = [i for i in indices]
 
 # Split data based on sample_id
 train_samples = indices[:train_size]
