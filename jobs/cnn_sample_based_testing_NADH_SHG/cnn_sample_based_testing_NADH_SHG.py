@@ -68,6 +68,7 @@ indices = [i for i in indices]
 
 # Split data based on sample_id
 train_samples = indices[:train_size]
+print(f"Train samples: {train_samples}")
 print(f"Training samples:")
 for id_num in train_samples:
     print(f"Sample_{(id_num+1):03}")
