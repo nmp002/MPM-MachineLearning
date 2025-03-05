@@ -101,15 +101,15 @@ with open(file, 'a') as f:
 
 train_indices = [full_dataset.get_sample_indices(sample) for sample in train_samples]
 train_indices = [i for sublist in train_indices for i in sublist]
-train_data = torch.utils.data.Subset(full_dataset.sample_wise_paths, train_indices)
+train_data = torch.utils.data.Subset(full_dataset, train_indices)
 
 val_indices = [full_dataset.get_sample_indices(sample) for sample in val_samples]
 val_indices = [i for sublist in val_indices for i in sublist]
-val_data = torch.utils.data.Subset(full_dataset.sample_wise_paths, val_indices)
+val_data = torch.utils.data.Subset(full_dataset, val_indices)
 
 test_indices = [full_dataset.get_sample_indices(sample) for sample in test_samples]
 test_indices = [i for sublist in test_indices for i in sublist]
-test_data = torch.utils.data.Subset(full_dataset.sample_wise_paths, test_indices)
+test_data = torch.utils.data.Subset(full_dataset, test_indices)
 
 
 # DataLoaders
