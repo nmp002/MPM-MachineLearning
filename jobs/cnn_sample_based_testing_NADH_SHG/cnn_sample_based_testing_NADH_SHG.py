@@ -28,7 +28,7 @@ random.seed(42) # changed from 42 to 40
 
 # Hyperparameters
 batch_size = 16
-epochs = 2500
+epochs = 500
 learning_rate = 1e-6
 
 # Transformations for training set
@@ -52,16 +52,8 @@ with open(file, 'w') as f:
     f.write('**Results** \n\n')
 
 # Sample-based dataset splitting
-samples_dict = full_dataset.samples  # Dictionary {sample_id: [list of FOVs]}
-samples_list = list(samples_dict.items())  # Convert to list of tuples
+samples_list = full_dataset.sample_wise_paths
 random.shuffle(samples_list)   # shuffle to avoid bias
-
-# Function to flatten sample-wise FOVs into a dataset
-def flatten_fovs(sample_list):
-    return [fov for _, fovs in sample_list for fov in fovs]
-
-
-full_dataset.samples = flatten_fovs(samples_list)
 full_dataset.transform = train_transform
 
 
@@ -71,62 +63,58 @@ train_size = int(0.7 * total_samples)
 val_size = int(0.2 * total_samples)
 test_size = total_samples - train_size - val_size
 
+indices = torch.utils.data.SubsetRandomSampler(range(len(samples_list)))
+
 # Split data based on sample_id
-train_samples = samples_list[:train_size]
-print(f"Training samples:{train_samples}")
+train_samples = indices[:train_size]
+print(f"Training samples:")
+for id_num in train_samples:
+    print(f"Sample_{(id_num+1):03}")
 with open(file, 'a') as f:
     f.write('**Training samples:**')
-    for sample_id, sample_data in train_samples:
-        f.write(f' {sample_id} |')  # Write which samples are used in training to results
+    for id_num in train_samples:
+        f.write(f"Sample_{(id_num+1):03} |")  # Write which samples are used in training to results
     f.write('\n\n')
 
-val_samples = samples_list[train_size:train_size + val_size]
-print(f"Validation samples:{val_samples}")
+val_samples = indices[train_size:train_size + val_size]
+print(f"Validation samples:")
+for id_num in val_samples:
+    print(f"Sample_{(id_num+1):03}")
 with open(file, 'a') as f:
     f.write('**Validation samples:**')
-    for sample_id, sample_data in val_samples:
-        f.write(f' {sample_id} |')  # samples in validation
+    for id_num in val_samples:
+        f.write(f"Sample_{(id_num+1):03} |")  # samples in validation
     f.write('\n\n')
 
 test_samples = samples_list[train_size + val_size:]
-print(f"Test samples:{test_samples}")
+print(f"Test samples:")
+for id_num in test_samples:
+    print(f"Sample_{(id_num+1):03}")
 with open(file, 'a') as f:
     f.write('**Test samples**:')
-    for sample_id, sample_data in test_samples:
-        f.write(f' {sample_id} |')  # samples in testing
+    for id_num in test_samples:
+        f.write(f'Sample_{(id_num+1):03} |')  # samples in testing
     f.write(f'\n\n{"-" * 100} \n\n')
 
 
-train_dataset = MicroscopyDataset(
-    csv_file="data/newData/labels.csv",
-    root_dir="data/newData",
-    channels = input_channels,
-    transform=None
-)
-train_dataset.samples = flatten_fovs(train_samples)
+train_indices = [full_dataset.get_sample_indices(sample) for sample in train_samples]
+train_indices = [i for sublist in train_indices for i in sublist]
+train_data = torch.utils.data.Subset(full_dataset.sample_wise_paths, train_indices)
 
-val_dataset = MicroscopyDataset(
-    csv_file="data/newData/labels.csv",
-    root_dir="data/newData",
-    channels = input_channels,
-    transform=None
-)
-val_dataset.samples = flatten_fovs(val_samples)
+val_indices = [full_dataset.get_sample_indices(sample) for sample in val_samples]
+val_indices = [i for sublist in val_indices for i in sublist]
+val_data = torch.utils.data.Subset(full_dataset.sample_wise_paths, val_indices)
 
-test_dataset = MicroscopyDataset(
-    csv_file="data/newData/labels.csv",
-    root_dir="data/newData",
-    channels = input_channels,
-    transform=None
-)
-test_dataset.samples = flatten_fovs(test_samples)
+test_indices = [full_dataset.get_sample_indices(sample) for sample in test_samples]
+test_indices = [i for sublist in test_indices for i in sublist]
+test_data = torch.utils.data.Subset(full_dataset.sample_wise_paths, test_indices)
 
 
 # DataLoaders
 dataloaders = {
-    'train': DataLoader(train_dataset, batch_size=batch_size, shuffle=True),
-    'val': DataLoader(val_dataset, batch_size=batch_size, shuffle=False),
-    'test': DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    'train': DataLoader(train_data, batch_size=batch_size, shuffle=True),
+    'val': DataLoader(val_data, batch_size=batch_size, shuffle=False),
+    'test': DataLoader(test_data, batch_size=batch_size, shuffle=False)
 }
 
 # Initialize models
@@ -232,7 +220,7 @@ for epoch in range(epochs):
             model.eval()
             targets = []
             outs = []
-            for sample in test_dataset.sample_wise_paths:
+            for sample in test_data:
                 fov_outs = []
                 if sample:
                     for fov in sample:
