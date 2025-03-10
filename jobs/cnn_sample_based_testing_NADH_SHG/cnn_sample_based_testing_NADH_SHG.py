@@ -229,8 +229,8 @@ for epoch in range(epochs):
                 labels = (labels > 30).float()
             loss = criterion(outputs, labels)
             val_loss += loss.item()
-    val_loss /= len(dataloaders['val'])
-    val_losses.append(val_loss)
+        val_loss /= len(dataloaders['val'])
+        val_losses.append(val_loss)
 
     if epoch == 0 or val_loss < best_loss:
         best_loss = val_loss
@@ -244,9 +244,6 @@ for epoch in range(epochs):
         # Save the trained model every 250 epochs
         torch.save(classification_model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
 
-        # Test the trained model every 250 epochs
-        model.load_state_dict(torch.load(f"classification_model_epoch{epoch+1}.pt"))
-
         with torch.no_grad():
             model.eval()
 
@@ -254,9 +251,9 @@ for epoch in range(epochs):
                 img = img.to(device)
                 y = model(img).cpu().squeeze()
 
-        targets = [1 if t > 25 else 0 for t in targets]
-        y = y.numpy().astype(np.float64).tolist()
-        score_em(targets, y)
+            targets = [1 if t > 25 else 0 for t in targets]
+            y = y.numpy().astype(np.float64).tolist()
+            score_em(targets, y)
 
 
         # Create training/val loss figure every 250 epochs
