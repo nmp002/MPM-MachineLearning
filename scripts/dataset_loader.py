@@ -48,7 +48,9 @@ class MicroscopyDataset(Dataset):
 
     def __getitem__(self, index):
         # De-nest fov paths and get the indexed item path
+        print(index)
         channel_paths, score = self._denest()[index]
+        print(channel_paths)
         combined_image = torch.cat([tiff_to_tensor(channel) for channel in channel_paths], dim=0)
         return combined_image, score
 

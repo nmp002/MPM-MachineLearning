@@ -197,7 +197,9 @@ def score_em(t, o):
 
 train_losses, val_losses = [], []
 best_loss = 100
+
 for epoch in range(epochs):
+    print('Training:')
     model.train()
     running_loss = 0.0
     for images, labels in dataloaders['train']:
@@ -216,6 +218,7 @@ for epoch in range(epochs):
     train_loss = running_loss / len(dataloaders['train'])
     train_losses.append(train_loss)
 
+    print('Validation:')
     model.eval()
     val_loss = 0.0
     with torch.no_grad():
