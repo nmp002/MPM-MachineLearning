@@ -36,11 +36,12 @@ class MicroscopyDataset(Dataset):
                         if all(os.path.exists(p) for p in channel_paths):
                             # Get each channel path
                             self.sample_wise_paths[-1].append((channel_paths, score))
-                            self.sample_n += len(channel_paths)
+                            self.sample_n += 1
                         else:
                             print(f"Missing images in {fov_dir}")
                     else:
                         print(f"Missing FOV directory: {fov_dir}")
+
             else:
                 print(f"Missing sample directory: {sample_path}")
         print(f"Total samples found: {self.sample_n}")
