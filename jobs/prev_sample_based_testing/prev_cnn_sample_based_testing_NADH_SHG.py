@@ -26,7 +26,7 @@ random.seed(42) # changed from 42 to 40
 
 # Hyperparameters
 batch_size = 16
-epochs = 15
+epochs = 500
 learning_rate = 1e-6
 
 # Transformations for training set
