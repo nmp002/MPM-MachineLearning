@@ -46,26 +46,29 @@ full_dataset = MicroscopyDataset(
     transform=None
 )
 
+train_dataset = MicroscopyDataset(
+    csv_file="data/newData/labels.csv",
+    root_dir="data/newData",
+    channels = input_channels,
+    transform=None
+)
 # Create a file to store the results
 file = 'results.md'
 with open(file, 'w') as f:
     f.write('**Results** \n\n')
 
-# Sample-based dataset splitting
-samples_list = full_dataset.sample_wise_paths
-random.shuffle(samples_list)   # shuffle to avoid bias
-full_dataset.transform = train_transform
+train_dataset.transform = train_transform
 
 
 # Compute split sizes
-total_samples = len(samples_list)
+total_samples = len(full_dataset.sample_wise_paths)
 train_size = int(0.7 * total_samples)
 val_size = int(0.2 * total_samples)
 test_size = total_samples - train_size - val_size
 
 
 
-indices = torch.utils.data.SubsetRandomSampler(range(len(samples_list)))
+indices = torch.utils.data.SubsetRandomSampler(range(total_samples))
 indices = [i for i in indices]
 
 # Split data based on sample_id
@@ -124,7 +127,7 @@ with open(file, 'a') as f:
 
 train_indices = [full_dataset.get_sample_indices(sample) for sample in train_samples]
 train_indices = [i for sublist in train_indices for i in sublist]
-train_data = torch.utils.data.Subset(full_dataset, train_indices)
+train_data = torch.utils.data.Subset(train_dataset, train_indices)
 
 val_indices = [full_dataset.get_sample_indices(sample) for sample in val_samples]
 val_indices = [i for sublist in val_indices for i in sublist]
