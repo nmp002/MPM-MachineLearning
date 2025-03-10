@@ -55,8 +55,6 @@ class MicroscopyDataset(Dataset):
     def __getitem__(self, idx):
         sample_id, fad_path, nadh_path, shg_path, orr_path, label = self.samples[idx]
 
-        print(idx)
-        print(sample_id)
         # Load images as tensors
         image_tensors = {
             'fad': self.tiff_to_tensor(fad_path),

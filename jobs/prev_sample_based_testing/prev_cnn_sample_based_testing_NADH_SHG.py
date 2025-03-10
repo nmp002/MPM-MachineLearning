@@ -167,7 +167,6 @@ task = 'classification'
 train_losses, val_losses = [], []
 best_loss = 100
 for epoch in range(epochs):
-    print('Training:')
     model.train()
     running_loss = 0.0
     for images, labels, sample_ids in dataloaders['train']:
@@ -186,7 +185,6 @@ for epoch in range(epochs):
     train_loss = running_loss / len(dataloaders['train'])
     train_losses.append(train_loss)
 
-    print('Validation:')
     model.eval()
     sample_predictions = defaultdict(list)
     sample_labels = {}
