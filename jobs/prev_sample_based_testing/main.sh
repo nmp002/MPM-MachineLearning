@@ -31,7 +31,7 @@ files=/home/nmp002/data/Highlands_Data_for_ML/newData
 echo "Copying files..."
 mkdir /scratch/$SLURM_JOB_ID/data
 rsync -avq $files /scratch/$SLURM_JOB_ID/data
-rsync -avq $SLURM_SUBMIT_DIR/prev_cnn_sample_based_testing.py /scratch/$SLURM_JOB_ID
+rsync -avq $SLURM_SUBMIT_DIR/prev_cnn_sample_based_testing_NADH_SHG.py /scratch/$SLURM_JOB_ID
 mkdir /scratch/$SLURM_JOB_ID/models
 rsync -avq /home/nmp002/MPM-MachineLearning/models/microscopy_cnn.py /scratch/$SLURM_JOB_ID/models
 mkdir /scratch/$SLURM_JOB_ID/scripts
@@ -42,7 +42,7 @@ wait
 cd /scratch/$SLURM_JOB_ID/ || EXIT
 
 echo "Python script initiating..."
-python3 prev_cnn_sample_based_testing.py
+python3 prev_cnn_sample_based_testing_NADH_SHG.py
 
 rsync -av -q /scratch/$SLURM_JOB_ID/ $SLURM_SUBMIT_DIR/
 
