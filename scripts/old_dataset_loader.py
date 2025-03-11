@@ -84,5 +84,6 @@ class MicroscopyDataset(Dataset):
 
         if self.label == 'classification':
             label_tensor = 1 if label_tensor >= 25 else 0
+        label_tensor = label_tensor.float()
 
         return combined_image, label_tensor
