@@ -175,7 +175,7 @@ for epoch in range(epochs):
         # if task == 'classification':
         #     labels = (labels > 25).float()
 
-        loss = criterion(outputs, labels)
+        loss = criterion(outputs, labels.float())
         loss.backward()
         optimizer.step()
         running_loss += loss.item()
@@ -191,7 +191,7 @@ for epoch in range(epochs):
             outputs = model(images).squeeze()
             # if task == 'classification':
             #     labels = (labels > 25).float()
-            loss = criterion(outputs, labels)
+            loss = criterion(outputs, labels.float())
             val_loss += loss.item()
     val_loss /= len(dataloaders['val'])
     val_losses.append(val_loss)
