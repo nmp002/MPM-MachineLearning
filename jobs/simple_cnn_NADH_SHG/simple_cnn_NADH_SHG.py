@@ -24,7 +24,7 @@ random.seed(42) # changed from 42 to 40
 
 # Hyperparameters
 batch_size = 16
-epochs = 2500
+epochs = 250
 learning_rate = 1e-6
 
 # Transformations for training set
@@ -210,6 +210,7 @@ for epoch in range(epochs):
 
         # Test the trained model every 250 epochs
         model.load_state_dict(torch.load(f"classification_model_epoch{epoch+1}.pt"))
+        scores_val,fig_val = score_model(model, dataloaders['val'],print_results=True, make_plot=True, threshold_type='roc',loss_fn=criterion)
         scores,fig = score_model(model, dataloaders['test'],print_results=True, make_plot=True, threshold_type='roc',loss_fn=criterion)
         fig.savefig(f'Epoch_{epoch+1}_test_plot.png')
         plt.close(fig)
