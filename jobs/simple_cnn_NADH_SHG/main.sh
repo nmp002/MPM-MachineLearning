@@ -35,7 +35,7 @@ rsync -avq $SLURM_SUBMIT_DIR/simple_cnn_NADH_SHG.py /scratch/$SLURM_JOB_ID
 mkdir /scratch/$SLURM_JOB_ID/models
 rsync -avq /home/nmp002/MPM-MachineLearning/models/microscopy_cnn.py /scratch/$SLURM_JOB_ID/models
 mkdir /scratch/$SLURM_JOB_ID/scripts
-rsync -avq /home/nmp002/MPM-MachineLearning/scripts/dataset_loader.py /scratch/$SLURM_JOB_ID/scripts
+rsync -avq /home/nmp002/MPM-MachineLearning/scripts/prev_dataset_loader.py /scratch/$SLURM_JOB_ID/scripts
 rsync -avq /home/nmp002/MPM-MachineLearning/scripts/model_metrics.py /scratch/$SLURM_JOB_ID/scripts
 wait
 
