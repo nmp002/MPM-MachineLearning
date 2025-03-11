@@ -175,7 +175,7 @@ for epoch in range(epochs):
         # if task == 'classification':
         #     labels = (labels > 25).float()
 
-        loss = criterion(outputs, labels.float())
+        loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
         running_loss += loss.item()
@@ -191,7 +191,7 @@ for epoch in range(epochs):
             outputs = model(images).squeeze()
             # if task == 'classification':
             #     labels = (labels > 25).float()
-            loss = criterion(outputs, labels.float())
+            loss = criterion(outputs, labels)
             val_loss += loss.item()
     val_loss /= len(dataloaders['val'])
     val_losses.append(val_loss)
@@ -210,7 +210,7 @@ for epoch in range(epochs):
 
         # Test the trained model every 250 epochs
         model.load_state_dict(torch.load(f"classification_model_epoch{epoch+1}.pt"))
-        scores,fig = score_model(model, dataloaders['test'],print_results=True, make_plot=True, threshold_type='roc')
+        scores,fig = score_model(model, dataloaders['test'],print_results=True, make_plot=True, threshold_type='roc',loss_fn=criterion)
         fig.savefig(f'Epoch_{epoch+1}_test_plot.png')
         plt.close(fig)
 
