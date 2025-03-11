@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 from models.microscopy_cnn import MicroscopyCNN
-from scripts.dataset_loader import MicroscopyDataset
+from scripts.prev_dataset_loader import MicroscopyDataset
 import torch.optim as optim
 import torch.nn as nn
 import random
@@ -172,8 +172,8 @@ for epoch in range(epochs):
         optimizer.zero_grad()
 
         outputs = model(images).squeeze()
-        if task == 'classification':
-            labels = (labels > 25).float()
+        # if task == 'classification':
+        #     labels = (labels > 25).float()
 
         loss = criterion(outputs, labels)
         loss.backward()
@@ -189,8 +189,8 @@ for epoch in range(epochs):
         for images, labels in dataloaders['val']:
             images, labels = images.to(device), labels.to(device)
             outputs = model(images).squeeze()
-            if task == 'classification':
-                labels = (labels > 25).float()
+            # if task == 'classification':
+            #     labels = (labels > 25).float()
             loss = criterion(outputs, labels)
             val_loss += loss.item()
     val_loss /= len(dataloaders['val'])
