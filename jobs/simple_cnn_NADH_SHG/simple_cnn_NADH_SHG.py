@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 from models.microscopy_cnn import MicroscopyCNN
-from scripts.prev_dataset_loader import MicroscopyDataset
+from scripts.old_dataset_loader import MicroscopyDataset
 import torch.optim as optim
 import torch.nn as nn
 import random
