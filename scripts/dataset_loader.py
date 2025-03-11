@@ -50,6 +50,9 @@ class MicroscopyDataset(Dataset):
         # De-nest fov paths and get the indexed item path
         channel_paths, score = self._denest()[index]
         combined_image = torch.cat([tiff_to_tensor(channel) for channel in channel_paths], dim=0)
+
+        combined_image[torch.isnan(combined_image)] = 0
+
         return combined_image, score
 
     def _denest(self):
