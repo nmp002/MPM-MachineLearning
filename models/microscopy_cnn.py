@@ -66,8 +66,8 @@ regression_criterion = nn.MSELoss()
 classification_criterion = nn.BCELoss()
 
 # Optimizer (Adam with weight decay for L2 regularization)
-regression_optimizer = optim.Adam(regression_model.parameters(), lr=1e-3, weight_decay=0.01)  # L2 regularization
-classification_optimizer = optim.Adam(classification_model.parameters(), lr=1e-3, weight_decay=0.01)
+regression_optimizer = optim.Adam(regression_model.parameters(), lr=1e-6, weight_decay=0.01)  # L2 regularization
+classification_optimizer = optim.Adam(classification_model.parameters(), lr=1e-6, weight_decay=0.01)
 
 # Print model summary
 # print(regression_model)
