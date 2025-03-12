@@ -145,6 +145,9 @@ dataloaders = {
     'test': DataLoader(test_data, batch_size=len(test_data), shuffle=False)
 }
 
+with open(file, 'a') as f:
+    f.write(f'Batch size: {batch_size}\nLength of val data: {len(val_data)}\nLength of test data: {len(test_data)}\n')
+
 # Initialize models
 regression_model = MicroscopyCNN(in_channels=in_channels, task='regression')
 classification_model = MicroscopyCNN(in_channels=in_channels, task='classification')
