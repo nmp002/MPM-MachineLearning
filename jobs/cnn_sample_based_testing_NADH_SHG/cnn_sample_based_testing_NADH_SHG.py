@@ -141,7 +141,7 @@ test_data = torch.utils.data.Subset(full_dataset, test_indices)
 # DataLoaders
 dataloaders = {
     'train': DataLoader(train_data, batch_size=batch_size, shuffle=True),
-    'val': DataLoader(val_data, batch_size=batch_size, shuffle=False),
+    'val': DataLoader(val_data, batch_size=5, shuffle=False),
     'test': DataLoader(test_data, batch_size=len(test_data), shuffle=False)
 }
 
