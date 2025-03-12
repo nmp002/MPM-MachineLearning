@@ -70,5 +70,5 @@ regression_optimizer = optim.Adam(regression_model.parameters(), lr=1e-3, weight
 classification_optimizer = optim.Adam(classification_model.parameters(), lr=1e-3, weight_decay=0.01)
 
 # Print model summary
-print(regression_model)
-print(classification_model)
+# print(regression_model)
+# print(classification_model)
