@@ -3,6 +3,7 @@
 # Main updates:
 #   Handles classification only (not regression)
 #   ReLUs added between each fc layer
+# Created on: March 18th, 2025
 #############################################################
 
 import torch.nn as nn
