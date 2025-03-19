@@ -8,7 +8,8 @@ from scripts.microscopy_dataset import MicroscopyDataset
 import random
 import datetime
 import matplotlib.pyplot as plt
-import os
+import torch.optim as optim
+import torch.nn as nn
 from models.classification_CNN import classificationModel
 
 
@@ -26,7 +27,7 @@ random.seed(42)
 
 # HYPERPARAMETERS
 batch_size = 16
-epochs = 250
+epochs = 500
 learning_rate = 1e-6
 
 # SET SPLITS
@@ -163,41 +164,94 @@ train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-# ==================================
-# INITIALIZE MODEL
-# ==================================
-model = classificationModel
+# =========================================
+# INITIALIZE MODEL, OPTIMIZER, & LOSS FN
+# =========================================
+model = classificationModel(in_channels=in_channels)
+optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
+loss_fn = nn.BCELoss()
+
+
+
 # ==================================
 # TRAINING LOOP
 # ==================================
-for ep in range(epochs):
+with open(results_file, 'a') as f:
+    f.write(f'## Training and Validation:\n')
+
+train_losses = []
+val_losses = []
+test_losses = []
+best_loss = 0.0
+for epoch in range(epochs):
     model.train()
+    running_loss = 0.0
     for x, target, _ in train_loader:
         x, target = x.to(device), target.to(device)
         optimizer.zero_grad()
-        out = model(x)
+        out = model(x).squeeze()
         loss = loss_fn(out, target)
+        running_loss += loss.item()
         loss.backward()
         optimizer.step()
+
+    train_loss = running_loss / len(train_dataset)
+    train_losses.append(train_loss)
+
 
 # ==================================
 # VALIDATION AND TESTING
 # ==================================
     model.eval()
+    running_loss = 0.0
     with torch.no_grad():
         for x, target, _ in val_loader:
             x, target = x.to(device), target.to(device)
-            out = model(x)
+            out = model(x).squeeze()
             loss = loss_fn(out, target)
+            running_loss += loss.item()
+
+        val_loss = running_loss / len(val_dataset)
+        val_losses.append(val_loss)
+
+    if epoch == 0 or val_loss < best_loss:
+        best_loss = val_loss
+        torch.save(model.state_dict(), "best_model.pt")
+        with open(results_file, 'a') as f:
+            f.write(f'New best at epoch **{epoch+1}** with val loss **{val_loss}** \n')
+
+    with open(results_file, 'a') as f:
+        f.write(f'Epoch {epoch+1}: **val loss {val_loss}** \n')
+        f.write(f'Epoch {epoch+1}: **train loss {train_loss}** \n')
 
 
-        if ep %% 250 == 0:
-            for x, target, _ in test_loader:
-                x, target = x.to(device), target.to(device)
-                out = model(x)
-                loss = loss_fn(out, target)
-                score = score_em(out, target)
+
+    if (epoch+1) % 250 == 0:
+        running_loss = 0.0
+        for x, target, _ in test_loader:
+            x, target = x.to(device), target.to(device)
+            out = model(x).squeeze()
+            loss = loss_fn(out, target)
+            running_loss += loss.item()
+            # score = score_em(out, target)
+
+        test_loss = running_loss / len(test_dataset)
+        test_losses.append(test_loss)
 
         # Save as desired
+
+        # Create training/val loss figure every 250 epochs
+        fig_class, ax_class = plt.subplots(figsize=(4, 3))
+        ax_class.set_xlabel('Epoch')
+        ax_class.set_ylabel('Loss')
+        ax_class.set_title('Loss Curves')
+
+        ax = ax_class
+        ax.clear()
+        ax.plot(train_losses, label='Training Loss')
+        ax.plot(val_losses, label='Validation Loss')
+        ax.plot(test_losses, label='Test Loss')
+        ax.legend()
+        fig_class.savefig(f'loss_epoch{epoch+1}.png')
 
 
