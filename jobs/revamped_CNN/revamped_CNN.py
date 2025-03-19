@@ -73,31 +73,31 @@ dataset = MicroscopyDataset(
 # ==================================
 # IMAGE CHECKPOINT 1
 # ==================================
-with open(results_file, 'a') as f:
-    f.write('## Image Checkpoint 1:\n')
-
-# Plot 5 random samples to ensure images are loaded correctly from dataset
-total_samples = len(dataset)
-random_indices = random.sample(range(total_samples), 5)
-for i, idx in enumerate(random_indices):
-    image, label, sample_id = dataset[idx]
-    fig, ax = plt.subplots(1, in_channels)
-    if in_channels == 1:
-        ax = [ax]
-    for channel in range(in_channels):
-        channel_image = image[channel].numpy()
-        ax[channel].imshow(channel_image, cmap='gray')
-        ax[channel].set_title(f'Channel {channel+1} - Sample: {sample_id}\nLabel: {label.item()}')
-        ax[channel].axis('off')
-    plt.tight_layout()
-
-    plot_filename = f'{sample_id}_Index_{idx}.png'
-    plt.savefig(plot_filename)
-    plt.close(fig)
-
-    with open(results_file, 'a') as f:
-        f.write(f'## {sample_id} (Label: {label.item()})\n\n')
-        f.write(f'![{sample_id}]({plot_filename})\n\n')
+# with open(results_file, 'a') as f:
+#     f.write('## Image Checkpoint 1:\n')
+#
+# # Plot 5 random samples to ensure images are loaded correctly from dataset
+# total_samples = len(dataset)
+# random_indices = random.sample(range(total_samples), 5)
+# for i, idx in enumerate(random_indices):
+#     image, label, sample_id = dataset[idx]
+#     fig, ax = plt.subplots(1, in_channels)
+#     if in_channels == 1:
+#         ax = [ax]
+#     for channel in range(in_channels):
+#         channel_image = image[channel].numpy()
+#         ax[channel].imshow(channel_image, cmap='gray')
+#         ax[channel].set_title(f'Channel {channel+1} - Sample: {sample_id}\nLabel: {label.item()}')
+#         ax[channel].axis('off')
+#     plt.tight_layout()
+#
+#     plot_filename = f'{sample_id}_Index_{idx}.png'
+#     plt.savefig(plot_filename)
+#     plt.close(fig)
+#
+#     with open(results_file, 'a') as f:
+#         f.write(f'## {sample_id} (Label: {label.item()})\n\n')
+#         f.write(f'![{sample_id}]({plot_filename})\n\n')
 
     # if os.path.exists(plot_filename):
     #     os.remove(plot_filename)
@@ -199,7 +199,7 @@ for epoch in range(epochs):
     train_loss = running_loss / len(train_dataset)
     train_losses.append(train_loss)
 
-
+#dlhfd
 # ==================================
 # VALIDATION AND TESTING
 # ==================================
@@ -251,7 +251,6 @@ for epoch in range(epochs):
         ax.clear()
         ax.plot(train_losses, label='Training Loss')
         ax.plot(val_losses, label='Validation Loss')
-        ax.plot(test_losses, label='Test Loss')
         ax.legend()
         fig_class.savefig(f'loss_epoch{epoch+1}.png')
 
