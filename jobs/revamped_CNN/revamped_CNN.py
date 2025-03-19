@@ -27,7 +27,7 @@ random.seed(42)
 
 # HYPERPARAMETERS
 batch_size = 16
-epochs = 500
+epochs = 2500
 learning_rate = 1e-6
 
 # SET SPLITS
