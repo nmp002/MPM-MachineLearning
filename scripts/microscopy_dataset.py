@@ -60,7 +60,7 @@ class MicroscopyDataset(Dataset):
         sample_dir, fov_dir, label, sample_id = self.img_labels[idx]
 
         # Path to the specific fov directory
-        fov_path = os.path.join(self.data_dir, sample_dir, fov_dir)
+        fov_path = os.path.join(self.data_dir, sample_id, fov_dir)
 
         # List to collect the tensors for each selected channel
         channel_tensors = []
