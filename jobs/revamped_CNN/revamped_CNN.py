@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import os
 from models.classification_CNN import classificationModel
 
+
 # ==================================
 # PRESETS/PARAMETERS CONFIGURATION
 # ==================================
@@ -29,8 +30,8 @@ epochs = 250
 learning_rate = 1e-6
 
 # SET SPLITS
-val_split = 0.2
-test_split = 0.1
+val_split = 0.17
+test_split = 0.13
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -51,11 +52,11 @@ now = datetime.now()
 timestamp = now.strftime("%m-%d-%Y_%H:%M")
 results_file = f"results_{timestamp}.md"
 with open(results_file, 'w') as f:
-    f.write('Results \n\n')
-    f.write(f'Channels used: {channels}\n')
-    f.write(f'Batch size: {batch_size}\n')
-    f.write(f'Epochs: {epochs}\n')
-    f.write(f'Learning rate: {learning_rate}\n\n')
+    f.write('# Results \n\n')
+    f.write(f'### Channels used: {channels}\n')
+    f.write(f'### Batch size: {batch_size}\n')
+    f.write(f'### Epochs: {epochs}\n')
+    f.write(f'### Learning rate: {learning_rate}\n')
 
 # ==================================
 # LOAD FULL DATASET
@@ -69,8 +70,11 @@ dataset = MicroscopyDataset(
 )
 
 # ==================================
-# IMAGE CHECKPOINT
+# IMAGE CHECKPOINT 1
 # ==================================
+with open(results_file, 'a') as f:
+    f.write('## Image Checkpoint 1:\n')
+
 # Plot 5 random samples to ensure images are loaded correctly from dataset
 total_samples = len(dataset)
 random_indices = random.sample(range(total_samples), 5)
@@ -94,10 +98,10 @@ for i, idx in enumerate(random_indices):
         f.write(f'## {sample_id} (Label: {label.item()})\n\n')
         f.write(f'![{sample_id}]({plot_filename})\n\n')
 
-    if os.path.exists(plot_filename):
-        os.remove(plot_filename)
-    else:
-        print(f'Warning: {plot_filename} does not exist')
+    # if os.path.exists(plot_filename):
+    #     os.remove(plot_filename)
+    # else:
+    #     print(f'Warning: {plot_filename} does not exist')
 
 # ==================================
 # LOAD SEPARATE TRAINING DATASET
@@ -114,7 +118,7 @@ train_dataset = MicroscopyDataset(
 # SAMPLE-BASED SPLITTING
 # ==================================
 # Grab all unique sample directories from img_labels
-sample_ids = list(set([sample_id for sample_dir, fov_dir, label, sample_id in dataset.img_labels]))
+sample_ids = list(set([sample_id for _, _, _, sample_id in dataset.img_labels]))
 
 # Split the sample_ids into train, val, and test sets
 train_ids, temp_ids = train_test_split(
@@ -158,4 +162,42 @@ test_dataset = Subset(dataset, test_indices)
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+
+# ==================================
+# INITIALIZE MODEL
+# ==================================
+model = classificationModel
+# ==================================
+# TRAINING LOOP
+# ==================================
+for ep in range(epochs):
+    model.train()
+    for x, target, _ in train_loader:
+        x, target = x.to(device), target.to(device)
+        optimizer.zero_grad()
+        out = model(x)
+        loss = loss_fn(out, target)
+        loss.backward()
+        optimizer.step()
+
+# ==================================
+# VALIDATION AND TESTING
+# ==================================
+    model.eval()
+    with torch.no_grad():
+        for x, target, _ in val_loader:
+            x, target = x.to(device), target.to(device)
+            out = model(x)
+            loss = loss_fn(out, target)
+
+
+        if ep %% 250 == 0:
+            for x, target, _ in test_loader:
+                x, target = x.to(device), target.to(device)
+                out = model(x)
+                loss = loss_fn(out, target)
+                score = score_em(out, target)
+
+        # Save as desired
+
 
