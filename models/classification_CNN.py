@@ -49,12 +49,8 @@ class classificationModel(nn.Module):
         x = self.relu(x)
         x = self.pool(x)
 
-        x = x.view(-1)
-        x = self.drop(x)
 
-        x = self.pool1(self.relu1(self.conv1(x)))
-        x = self.pool2(self.relu2(self.conv2(x)))
-        x = self.pool3(self.relu3(self.conv3(x)))
+        x = self.drop(x)
 
         x = self.flat(x)  # Adjust size based on the input image size (64x64 after pooling)
 
