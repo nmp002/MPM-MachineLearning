@@ -41,6 +41,7 @@ class MicroscopyDataset(Dataset):
                               if os.path.isdir(os.path.join(self.data_dir, d))])
 
         for sample_path in sample_dirs:
+            sample_id = Path(sample_path).name
             fov_dirs = sorted([f for f in os.listdir(sample_path)
                                if os.path.isdir(os.path.join(sample_path, f))])
 
@@ -48,7 +49,7 @@ class MicroscopyDataset(Dataset):
                 # Assign label from labels_csv
                 label = torch.tensor(self.sample_labels.loc[Path(sample_path).name, 'recurrence_score'])
 
-                self.img_labels.append((sample_path, fov_dir, label))
+                self.img_labels.append((sample_path, fov_dir, label, sample_id))
 
         print(f"Found {len(sample_dirs)} Samples for a total of {len(self.img_labels)} fovs.")
 
@@ -56,7 +57,7 @@ class MicroscopyDataset(Dataset):
         return len(self.img_labels)
 
     def __getitem__(self, idx):
-        sample_dir, fov_dir, label = self.img_labels[idx]
+        sample_dir, fov_dir, label, sample_id = self.img_labels[idx]
 
         # Path to the specific fov directory
         fov_path = os.path.join(self.data_dir, sample_dir, fov_dir)
@@ -83,7 +84,7 @@ class MicroscopyDataset(Dataset):
 
         label = self.label_fn(label)
 
-        return image, label
+        return image, label, sample_id
 
 
 
