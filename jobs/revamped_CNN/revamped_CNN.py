@@ -18,8 +18,8 @@ from models.classification_CNN import classificationModel
 # ==================================
 channels = ['nadh','shg']
 in_channels = len(channels)
-data_dir = r"C:\Users\nmp002\PycharmProjects\MPM-MachineLearning\data\newData"
-labels_csv = r"C:\Users\nmp002\PycharmProjects\MPM-MachineLearning\data\newData\labels.csv"
+data_dir = "data/newData"
+labels_csv = "data/newData/labels.csv"
 label_fn = lambda x: torch.tensor(float(x > 25))
 
 torch.manual_seed(42)
