@@ -6,7 +6,7 @@ import torchvision.transforms.v2 as tvt
 from torch.utils.data import DataLoader
 from scripts.microscopy_dataset import MicroscopyDataset
 import random
-import datetime
+from datetime import datetime
 import matplotlib.pyplot as plt
 import torch.optim as optim
 import torch.nn as nn
