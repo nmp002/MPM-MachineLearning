@@ -168,6 +168,7 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 # INITIALIZE MODEL, OPTIMIZER, & LOSS FN
 # =========================================
 model = classificationModel(in_channels=in_channels)
+model.to(device)
 optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
 loss_fn = nn.BCELoss()
 
