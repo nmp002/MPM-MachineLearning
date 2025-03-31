@@ -257,7 +257,7 @@ for epoch in range(epochs):
             sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
             targets = [item for target in targets for item in target]
             sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
-            score_em(targets, ys)
+            # score_em(targets, ys)
             score_em(sample_targets, sample_ys)
 
 
