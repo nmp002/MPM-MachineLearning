@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=revamped_CNN
+#SBATCH --job-name=cross_validation_Fold1
 #SBATCH --partition=agpu06
 #SBATCH --output=hogML_main.txt
 #SBATCH --error=hogML_main.err
@@ -31,7 +31,7 @@ files=/home/nmp002/data/Highlands_Data_for_ML/newData
 echo "Copying files..."
 mkdir /scratch/$SLURM_JOB_ID/data
 rsync -avq $files /scratch/$SLURM_JOB_ID/data
-rsync -avq $SLURM_SUBMIT_DIR/revamped_CNN.py /scratch/$SLURM_JOB_ID
+rsync -avq $SLURM_SUBMIT_DIR/cross_validation_Fold1.py /scratch/$SLURM_JOB_ID
 mkdir /scratch/$SLURM_JOB_ID/models
 rsync -avq /home/nmp002/MPM-MachineLearning/models/classification_CNN.py /scratch/$SLURM_JOB_ID/models
 mkdir /scratch/$SLURM_JOB_ID/scripts
@@ -42,7 +42,7 @@ wait
 cd /scratch/$SLURM_JOB_ID/ || EXIT
 
 echo "Python script initiating..."
-python3 revamped_CNN.py
+python3 cross_validation_Fold1.py
 
 rsync -av -q /scratch/$SLURM_JOB_ID/ $SLURM_SUBMIT_DIR/
 
