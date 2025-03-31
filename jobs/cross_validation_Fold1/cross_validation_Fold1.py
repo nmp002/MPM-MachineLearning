@@ -28,7 +28,7 @@ random.seed(42)
 
 # HYPERPARAMETERS
 batch_size = 16
-epochs = 2500
+epochs = 750
 learning_rate = 1e-6
 
 # SET SPLITS
@@ -123,17 +123,13 @@ train_dataset = MicroscopyDataset(
 sample_ids = list(set([sample_id for _, _, _, sample_id in dataset.img_labels]))
 
 # Split the sample_ids into train, val, and test sets
-train_ids, temp_ids = train_test_split(
-    sample_ids,
-    test_size = (val_split + test_split),
-    random_state=42,
-)
+train_ids = ['Sample_007', 'Sample_008', 'Sample_009', 'Sample_010', 'Sample_011', 'Sample_012',
+ 'Sample_013', 'Sample_014', 'Sample_015', 'Sample_016', 'Sample_017', 'Sample_018',
+ 'Sample_019', 'Sample_020', 'Sample_022', 'Sample_023', 'Sample_024', 'Sample_025',
+ 'Sample_026', 'Sample_027', 'Sample_028', 'Sample_029', 'Sample_030']
 
-val_ids, test_ids = train_test_split(
-    temp_ids,
-    test_size = test_split / (val_split + test_split),
-    random_state=42,
-)
+
+test_ids = ['Sample_001', 'Sample_002', 'Sample_003', 'Sample_004', 'Sample_005', 'Sample_006']
 
 # Function to get indices of img_labels belonging to a given set of sample_ids
 def get_indices_by_sample_ids(img_labels, sample_ids_set):
@@ -145,24 +141,24 @@ def get_indices_by_sample_ids(img_labels, sample_ids_set):
 
 # Create lists of indices for each split
 train_indices = get_indices_by_sample_ids(train_dataset.img_labels, set(train_ids))
-val_indices = get_indices_by_sample_ids(dataset.img_labels, set(val_ids))
+# val_indices = get_indices_by_sample_ids(dataset.img_labels, set(val_ids))
 test_indices = get_indices_by_sample_ids(dataset.img_labels, set(test_ids))
 
 with open(results_file, 'a') as f:
     f.write(f'Training Indices ({len(train_indices)}): {train_indices}\n')
-    f.write(f'Validation Indices ({len(val_indices)}): {val_indices}\n')
+    # f.write(f'Validation Indices ({len(val_indices)}): {val_indices}\n')
     f.write(f'Test Indices ({len(test_indices)}): {test_indices}\n')
 
 # Create dataset subsets
 train_dataset = Subset(train_dataset, train_indices)
-val_dataset = Subset(dataset, val_indices)
+# val_dataset = Subset(dataset, val_indices)
 test_dataset = Subset(dataset, test_indices)
 
 # ==================================
 # DATALOADERS
 # ==================================
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+# val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 # =========================================
@@ -219,25 +215,25 @@ for epoch in range(epochs):
 # ==================================
     model.eval()
     running_loss = 0.0
-    with torch.no_grad():
-        for x, target, _ in val_loader:
-            x, target = x.to(device), target.to(device)
-            out = model(x).squeeze()
-            loss = loss_fn(out, target)
-            running_loss += loss.item()
-
-        val_loss = running_loss / len(val_dataset)
-        val_losses.append(val_loss)
-
-    if epoch == 0 or val_loss < best_loss:
-        best_loss = val_loss
-        torch.save(model.state_dict(), "best_model.pt")
-        with open(results_file, 'a') as f:
-            f.write(f'New best at epoch **{epoch+1}** with val loss **{val_loss}** \n')
-
-    with open(results_file, 'a') as f:
-        f.write(f'Epoch {epoch+1}: **val loss {val_loss}** \n')
-        f.write(f'Epoch {epoch+1}: **train loss {train_loss}** \n')
+    # with torch.no_grad():
+    #     for x, target, _ in val_loader:
+    #         x, target = x.to(device), target.to(device)
+    #         out = model(x).squeeze()
+    #         loss = loss_fn(out, target)
+    #         running_loss += loss.item()
+    #
+    #     val_loss = running_loss / len(val_dataset)
+    #     val_losses.append(val_loss)
+    #
+    # if epoch == 0 or val_loss < best_loss:
+    #     best_loss = val_loss
+    #     torch.save(model.state_dict(), "best_model.pt")
+    #     with open(results_file, 'a') as f:
+    #         f.write(f'New best at epoch **{epoch+1}** with val loss **{val_loss}** \n')
+    #
+    # with open(results_file, 'a') as f:
+    #     f.write(f'Epoch {epoch+1}: **val loss {val_loss}** \n')
+    #     f.write(f'Epoch {epoch+1}: **train loss {train_loss}** \n')
 
 
 
@@ -269,16 +265,16 @@ for epoch in range(epochs):
         # Save as desired
 
         # Create training/val loss figure every 250 epochs
-        fig_class, ax_class = plt.subplots(figsize=(4, 3))
-        ax_class.set_xlabel('Epoch')
-        ax_class.set_ylabel('Loss')
-        ax_class.set_title('Loss Curves')
-
-        ax = ax_class
-        ax.clear()
-        ax.plot(train_losses, label='Training Loss')
-        ax.plot(val_losses, label='Validation Loss')
-        ax.legend()
-        fig_class.savefig(f'loss_epoch{epoch+1}.png')
+        # fig_class, ax_class = plt.subplots(figsize=(4, 3))
+        # ax_class.set_xlabel('Epoch')
+        # ax_class.set_ylabel('Loss')
+        # ax_class.set_title('Loss Curves')
+        #
+        # ax = ax_class
+        # ax.clear()
+        # ax.plot(train_losses, label='Training Loss')
+        # ax.plot(val_losses, label='Validation Loss')
+        # ax.legend()
+        # fig_class.savefig(f'loss_epoch{epoch+1}.png')
 
 
