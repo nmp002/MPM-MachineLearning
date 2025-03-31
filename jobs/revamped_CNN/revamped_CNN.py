@@ -250,7 +250,9 @@ for epoch in range(epochs):
             for img, target, _ in test_loader:
                 img, target = img.to(device), target.to(device)
                 y = model(img).squeeze()
+                y = y.cpu()
                 y = y.numpy().astype(np.float64).tolist()
+                target = target.cpu()
                 target = target.numpy().astype(np.float64).tolist()
                 ys.append(y)
                 targets.append(target)
