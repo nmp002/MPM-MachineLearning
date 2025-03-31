@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 import torch.optim as optim
 import torch.nn as nn
 from models.classification_CNN import classificationModel
-
+import numpy as np
+from sklearn.metrics import roc_curve, auc, RocCurveDisplay, ConfusionMatrixDisplay
 
 # ==================================
 # PRESETS/PARAMETERS CONFIGURATION
@@ -172,7 +173,21 @@ model.to(device)
 optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
 loss_fn = nn.BCELoss()
 
-
+# ==================================
+# DEFINE SCORING FUNCTION
+# ==================================
+    # Function to calculate scores and plot roc curve/confusion matrix
+def score_em(t, o):
+    fpr, tpr, thresholds = roc_curve(t, o)
+    test_score = auc(fpr, tpr)
+    thresh = thresholds[np.argmax(tpr - fpr)]
+    preds = [out >= thresh for out in o]
+    roc_display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=test_score)
+    roc_display.plot()
+    plt.savefig(f'Epoch_{epoch + 1}_roc_curve.png')
+    conf_matrix = ConfusionMatrixDisplay.from_predictions(t, preds)
+    conf_matrix.plot()
+    plt.savefig(f'Epoch_{epoch + 1}_confusion_matrix.png')
 
 # ==================================
 # TRAINING LOOP
@@ -199,7 +214,6 @@ for epoch in range(epochs):
     train_loss = running_loss / len(train_dataset)
     train_losses.append(train_loss)
 
-#dlhfd
 # ==================================
 # VALIDATION AND TESTING
 # ==================================
@@ -228,16 +242,17 @@ for epoch in range(epochs):
 
 
     if (epoch+1) % 250 == 0:
-        running_loss = 0.0
-        for x, target, _ in test_loader:
-            x, target = x.to(device), target.to(device)
-            out = model(x).squeeze()
-            loss = loss_fn(out, target)
-            running_loss += loss.item()
-            # score = score_em(out, target)
+        with torch.no_grad():
+            model.eval()
+            ys, targets = [], []
+            for img, target, _ in test_loader:
+                img, target = img.to(device), target.to(device)
+                y = model(img).squeeze()
+                ys.append(y)
+                targets.append(targets)
+            score_em(targets, ys)
 
-        test_loss = running_loss / len(test_dataset)
-        test_losses.append(test_loss)
+
 
         # Save as desired
 
