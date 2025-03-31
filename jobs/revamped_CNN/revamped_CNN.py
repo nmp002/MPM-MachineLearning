@@ -242,15 +242,25 @@ for epoch in range(epochs):
 
 
     if (epoch+1) % 250 == 0:
+        # Save the trained model every 250 epochs
+        torch.save(model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
         with torch.no_grad():
             model.eval()
             ys, targets = [], []
             for img, target, _ in test_loader:
                 img, target = img.to(device), target.to(device)
                 y = model(img).squeeze()
+                y = y.numpy().astype(np.float64).tolist()
+                target = target.numpy().astype(np.float64).tolist()
                 ys.append(y)
-                targets.append(targets)
+                targets.append(target)
+
+            ys = [item for y in ys for item in y]
+            sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
+            targets = [item for target in targets for item in target]
+            sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
             score_em(targets, ys)
+            score_em(sample_targets, sample_ys)
 
 
 
