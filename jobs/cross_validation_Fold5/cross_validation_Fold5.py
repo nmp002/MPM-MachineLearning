@@ -239,7 +239,7 @@ for epoch in range(epochs):
 
 
 
-    if (epoch+1) % 25 == 0:
+    if (epoch+1) % 5 == 0:
         # Save the trained model every 250 epochs
         torch.save(model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
         with torch.no_grad():
