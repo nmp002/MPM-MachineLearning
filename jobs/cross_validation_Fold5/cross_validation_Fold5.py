@@ -177,7 +177,7 @@ def score_em(t, o):
     fpr, tpr, thresholds = roc_curve(t, o)
     test_score = auc(fpr, tpr)
     thresh = thresholds[np.argmax(tpr - fpr)]
-    preds = [out >= thresh for out in o]
+    preds = [out_value >= thresh for out_value in o]
     roc_display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=test_score)
     roc_display.plot()
     plt.savefig(f'Epoch_{epoch + 1}_roc_curve.png')
