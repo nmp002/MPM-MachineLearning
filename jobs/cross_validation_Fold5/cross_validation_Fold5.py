@@ -256,7 +256,7 @@ for epoch in range(epochs):
                 ys.append(y)
                 targets.append(target)
 
-                for id_name, target_name in zip(sample_id, target):
+                for id_name, target_name in zip(sample_ids, target):
                     sample_targets[id_name].append(target_name.item())
 
 
