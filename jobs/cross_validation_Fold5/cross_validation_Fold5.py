@@ -247,21 +247,22 @@ for epoch in range(epochs):
             ys, targets = [], []
             sample_targets = defaultdict(list)
             for img, target, sample_ids in test_loader:
-                img, target = img.to(device), target.to(device)
+                img = img.to(device)
                 y = model(img).squeeze()
                 y = y.cpu()
                 y = y.numpy().astype(np.float64).tolist()
+
+                for id_name, target_name in zip(sample_ids, target):
+                    sample_targets[id_name].append(target_name.item())
+
                 target = target.cpu()
                 target = target.numpy().astype(np.float64).tolist()
                 ys.append(y)
                 targets.append(target)
 
-                for id_name, target_name in zip(sample_ids, target):
-                    sample_targets[id_name].append(target_name.item())
-
 
             averaged_targets = {}
-            for sample_id, target_list in sample_targets.item():
+            for sample_id, target_list in sample_targets.items():
                 if all(target == target_list[0] for target in target_list):
                     averaged_targets[sample_id] = target_list[0]
                 else:
