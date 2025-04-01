@@ -262,7 +262,7 @@ for epoch in range(epochs):
 
             averaged_targets = {}
             for sample_id, target_list in sample_targets.item():
-                if all(target = target_list[0] for target in target_list):
+                if all(target == target_list[0] for target in target_list):
                     averaged_targets[sample_id] = target_list[0]
                 else:
                     print(f'Warning: Inconsistent targets for {sample_id} -> {target_list}')
