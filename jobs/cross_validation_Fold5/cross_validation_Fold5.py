@@ -1,6 +1,7 @@
 ## Imports ##
 import torch
 from sklearn.model_selection import train_test_split
+from sympy.stats.rv import sampling_E
 from torch.utils.data import Subset
 import torchvision.transforms.v2 as tvt
 from torch.utils.data import DataLoader
@@ -13,6 +14,7 @@ import torch.nn as nn
 from models.classification_CNN import classificationModel
 import numpy as np
 from sklearn.metrics import roc_curve, auc, RocCurveDisplay, ConfusionMatrixDisplay
+from collections import defaultdict
 
 # ==================================
 # PRESETS/PARAMETERS CONFIGURATION
@@ -237,13 +239,14 @@ for epoch in range(epochs):
 
 
 
-    if (epoch+1) % 50 == 0:
+    if (epoch+1) % 25 == 0:
         # Save the trained model every 250 epochs
         torch.save(model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
         with torch.no_grad():
             model.eval()
             ys, targets = [], []
-            for img, target, _ in test_loader:
+            sample_targets = defaultdict(list)
+            for img, target, sample_ids in test_loader:
                 img, target = img.to(device), target.to(device)
                 y = model(img).squeeze()
                 y = y.cpu()
@@ -253,12 +256,24 @@ for epoch in range(epochs):
                 ys.append(y)
                 targets.append(target)
 
+                for id_name, target_name in zip(sample_id, target):
+                    sample_targets[id_name].append(target_name.item())
+
+
+            averaged_targets = {}
+            for sample_id, target_list in sample_targets.item():
+                if all(target = target_list[0] for target in target_list):
+                    averaged_targets[sample_id] = target_list[0]
+                else:
+                    print(f'Warning: Inconsistent targets for {sample_id} -> {target_list}')
+                    epoch = epochs
+
             ys = [item for y in ys for item in y]
             sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
-            targets = [item for target in targets for item in target]
-            sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
+            # targets = [item for target in targets for item in target]
+            # sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
             # score_em(targets, ys)
-            score_em(sample_targets, sample_ys)
+            score_em(list(averaged_targets.values()), sample_ys)
 
 
 
