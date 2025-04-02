@@ -1,4 +1,5 @@
 ## Imports ##
+import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Subset
@@ -235,30 +236,56 @@ for epoch in range(epochs):
     #     f.write(f'Epoch {epoch+1}: **val loss {val_loss}** \n')
     #     f.write(f'Epoch {epoch+1}: **train loss {train_loss}** \n')
 
-
-
-    if (epoch+1) % 250 == 0:
-        # Save the trained model every 250 epochs
+    if (epoch+1) % 500 == 0:
         torch.save(model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
+        sample_info = pd.DataFrame(columns=['Sample Id', 'Index', 'Targets', 'Outputs'])
+        row = 0
+
         with torch.no_grad():
             model.eval()
-            ys, targets = [], []
-            for img, target, _ in test_loader:
-                img, target = img.to(device), target.to(device)
-                y = model(img).squeeze()
-                y = y.cpu()
-                y = y.numpy().astype(np.float64).tolist()
-                target = target.cpu()
-                target = target.numpy().astype(np.float64).tolist()
-                ys.append(y)
-                targets.append(target)
+            for test_id in test_ids:
+                test_indices = get_indices_by_sample_ids(dataset.img_labels, test_id)
+                # print(f'Test indices: {test_indices}')
+                test_dataset = Subset(dataset, test_indices)
+                # print(f'Dataset length: {len(test_dataset)}')
+                for idx in range(len(test_indices)):
+                    # print(f'Index: {idx}')
+                    img = test_dataset[idx][0].unsqueeze(0)
+                    img = img.to(device)
+                    output = model(img).cpu().squeeze()
+                    output = output.cpu()
+                    # print(f'Output: {output}')
+                    # print(output)
+                    target = test_dataset[idx][1]
+                    target = target.numpy().astype(np.float64).tolist()
+                    output = output.numpy().astype(np.float64).tolist()
+                    sample_info.loc[row] = [test_id, test_indices[idx], target, output]
+                    row += 1
 
-            ys = [item for y in ys for item in y]
-            sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
-            targets = [item for target in targets for item in target]
-            sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
-            score_em(targets, ys)
-            score_em(sample_targets, sample_ys)
+        print(sample_info)
+
+    # if (epoch+1) % 250 == 0:
+    #     # Save the trained model every 250 epochs
+    #     torch.save(model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
+    #     with torch.no_grad():
+    #         model.eval()
+    #         ys, targets = [], []
+    #         for img, target, _ in test_loader:
+    #             img, target = img.to(device), target.to(device)
+    #             y = model(img).squeeze()
+    #             y = y.cpu()
+    #             y = y.numpy().astype(np.float64).tolist()
+    #             target = target.cpu()
+    #             target = target.numpy().astype(np.float64).tolist()
+    #             ys.append(y)
+    #             targets.append(target)
+    #
+    #         ys = [item for y in ys for item in y]
+    #         sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
+    #         targets = [item for target in targets for item in target]
+    #         sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
+    #         score_em(targets, ys)
+    #         score_em(sample_targets, sample_ys)
 
 
 
