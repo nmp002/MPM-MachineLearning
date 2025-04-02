@@ -250,6 +250,7 @@ for epoch in range(epochs):
     #     f.write(f'Epoch {epoch+1}: **train loss {train_loss}** \n')
 
     if (epoch+1) % 500 == 0:
+        torch.save(model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
         sample_info = pd.DataFrame(columns=['Sample Id', 'Index', 'Targets', 'Outputs'])
         row = 0
 
