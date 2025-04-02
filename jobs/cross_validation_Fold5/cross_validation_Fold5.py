@@ -1,4 +1,5 @@
 ## Imports ##
+import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
 from sympy.stats.rv import sampling_E
@@ -207,6 +208,8 @@ val_losses = []
 test_losses = []
 best_loss = 0.0
 for epoch in range(epochs):
+    with open(results_file, 'a') as f:
+        f.write(f'Epoch: {epoch + 1}\n')
     model.train()
     running_loss = 0.0
     for x, target, _ in train_loader:
@@ -246,44 +249,69 @@ for epoch in range(epochs):
     #     f.write(f'Epoch {epoch+1}: **val loss {val_loss}** \n')
     #     f.write(f'Epoch {epoch+1}: **train loss {train_loss}** \n')
 
+    if (epoch+1) % 500 == 0:
+        sample_info = pd.DataFrame(columns=['Sample Id', 'Index', 'Targets', 'Outputs'])
+        row = 0
 
-
-    if (epoch+1) % 50 == 0:
-        # Save the trained model every 250 epochs
-        torch.save(model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
         with torch.no_grad():
             model.eval()
-            ys, targets = [], []
-            sample_targets = defaultdict(list)
-            for img, target, sample_ids in test_loader:
-                img = img.to(device)
-                y = model(img).squeeze()
-                y = y.cpu()
-                y = y.numpy().astype(np.float64).tolist()
+            for test_id in test_ids:
+                test_indices = get_indices_by_sample_ids(dataset.img_labels, test_id)
+                # print(f'Test indices: {test_indices}')
+                test_dataset = Subset(dataset, test_indices)
+                # print(f'Dataset length: {len(test_dataset)}')
+                for idx in range(len(test_indices)):
+                    # print(f'Index: {idx}')
+                    img = test_dataset[idx][0].unsqueeze(0)
+                    img = img.to(device)
+                    output = model(img).cpu().squeeze()
+                    output = output.cpu()
+                    # print(f'Output: {output}')
+                    # print(output)
+                    target = test_dataset[idx][1]
+                    target = target.numpy().astype(np.float64).tolist()
+                    output = output.numpy().astype(np.float64).tolist()
+                    sample_info.loc[row] = [test_id, test_indices[idx], target, output]
+                    row += 1
 
-                for id_name, target_name in zip(sample_ids, target):
-                    sample_targets[id_name].append(target_name.item())
+        print(sample_info)
 
-                target = target.cpu()
-                target = target.numpy().astype(np.float64).tolist()
-                ys.append(y)
-                targets.append(target)
-
-
-            averaged_targets = {}
-            for sample_id, target_list in sample_targets.items():
-                if all(target == target_list[0] for target in target_list):
-                    averaged_targets[sample_id] = target_list[0]
-                else:
-                    print(f'Warning: Inconsistent targets for {sample_id} -> {target_list}')
-                    epoch = epochs
-
-            ys = [item for y in ys for item in y]
-            sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
-            # targets = [item for target in targets for item in target]
-            # sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
-            # score_em(targets, ys)
-            score_em(list(averaged_targets.values()), sample_ys)
+    # if (epoch+1) % 50 == 0:
+    #     # Save the trained model every 250 epochs
+    #     torch.save(model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
+    #     with torch.no_grad():
+    #         model.eval()
+    #         ys, targets = [], []
+    #         sample_targets = defaultdict(list)
+    #         for img, target, sample_ids in test_loader:
+    #             img = img.to(device)
+    #             y = model(img).squeeze()
+    #             y = y.cpu()
+    #             y = y.numpy().astype(np.float64).tolist()
+    #
+    #             for id_name, target_name in zip(sample_ids, target):
+    #                 sample_targets[id_name].append(target_name.item())
+    #
+    #             target = target.cpu()
+    #             target = target.numpy().astype(np.float64).tolist()
+    #             ys.append(y)
+    #             targets.append(target)
+    #
+    #
+    #         averaged_targets = {}
+    #         for sample_id, target_list in sample_targets.items():
+    #             if all(target == target_list[0] for target in target_list):
+    #                 averaged_targets[sample_id] = target_list[0]
+    #             else:
+    #                 print(f'Warning: Inconsistent targets for {sample_id} -> {target_list}')
+    #                 epoch = epochs
+    #
+    #         ys = [item for y in ys for item in y]
+    #         sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
+    #         # targets = [item for target in targets for item in target]
+    #         # sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
+    #         # score_em(targets, ys)
+    #         score_em(list(averaged_targets.values()), sample_ys)
 
 
 
