@@ -197,6 +197,7 @@ val_losses = []
 test_losses = []
 best_loss = 0.0
 for epoch in range(epochs):
+    print(f'Epoch {epoch+1}')
     model.train()
     running_loss = 0.0
     for x, target, _ in train_loader:
