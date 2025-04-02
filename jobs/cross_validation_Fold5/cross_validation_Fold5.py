@@ -39,7 +39,7 @@ def set_seed(seed: int = 42) -> None:
 
 # HYPERPARAMETERS
 batch_size = 16
-epochs = 750
+epochs = 500
 learning_rate = 1e-6
 
 # SET SPLITS
@@ -248,7 +248,7 @@ for epoch in range(epochs):
 
 
 
-    if (epoch+1) % 5 == 0:
+    if (epoch+1) % 50 == 0:
         # Save the trained model every 250 epochs
         torch.save(model.state_dict(), f"classification_model_epoch{epoch+1}.pt")
         with torch.no_grad():
