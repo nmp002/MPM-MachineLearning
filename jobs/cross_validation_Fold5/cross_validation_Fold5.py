@@ -38,6 +38,8 @@ def set_seed(seed: int = 42) -> None:
     os.environ["PYTHONHASHSEED"] = str(seed)
     print(f"Random seed set as {seed}")
 
+set_seed()
+
 # HYPERPARAMETERS
 batch_size = 16
 epochs = 500
