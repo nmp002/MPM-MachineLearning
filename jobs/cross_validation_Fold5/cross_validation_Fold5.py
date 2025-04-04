@@ -265,7 +265,7 @@ for epoch in range(epochs):
                     # print(f'Index: {idx}')
                     img = test_dataset[idx][0].unsqueeze(0)
                     img = img.to(device)
-                    output = model(img).cpu().squeeze()
+                    output = model(img).squeeze()
                     output = output.cpu()
                     # print(f'Output: {output}')
                     # print(output)
