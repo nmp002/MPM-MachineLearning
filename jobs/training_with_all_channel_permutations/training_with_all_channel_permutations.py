@@ -184,7 +184,7 @@ for channels in channel_set:
 # TRAINING LOOP
 # ==================================
 
-for i in range(len(models)):
+for i in range(3,4):
     with open(results_file, 'a') as f:
         f.write(f'Training model_{i+1}:\n')
         f.write(f'Channel Inputs: {channel_set[i]}\n')
@@ -204,6 +204,8 @@ for i in range(len(models)):
             x, target = x.to(device), target.to(device)
             optimizer.zero_grad()
             out = model(x).squeeze()
+            if out < 0 or out > 1:
+                print(f'Model output {out} is out of range')
             loss = loss_fn(out, target)
 
             loss.backward()
