@@ -204,8 +204,9 @@ for i in range(3,4):
             x, target = x.to(device), target.to(device)
             optimizer.zero_grad()
             out = model(x).squeeze()
-            if out < 0 or out > 1:
-                print(f'Model output {out} is out of range')
+            invalid_outs = out[(out < 0 | out > 1)]
+            if invalid_outs.numel() > 0:
+                print(f'Found invalid model outputs: {invalid_outs}')
             loss = loss_fn(out, target)
 
             loss.backward()
