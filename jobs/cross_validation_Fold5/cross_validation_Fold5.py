@@ -186,7 +186,7 @@ loss_fn = nn.BCELoss()
 # ==================================
 # DEFINE SCORING FUNCTION
 # ==================================
-    # Function to calculate scores and plot roc curve/confusion matrix
+# Function to calculate scores and plot roc curve/confusion matrix
 def score_em(t, o):
     fpr, tpr, thresholds = roc_curve(t, o)
     test_score = auc(fpr, tpr)
