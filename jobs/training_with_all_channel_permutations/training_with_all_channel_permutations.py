@@ -98,25 +98,17 @@ def get_indices_by_sample_ids(img_labels, sample_ids_set):
 # INITIALIZE MODELS, OPTIMIZERS, & LOSS FNS
 # =========================================
 
+# ORR maps excluded from channels for now -- too many NaN values
 channel_set = [
-    ['nadh'],   # 1-item combinations
+    ['nadh'],
     ['fad'],
     ['shg'],
-    ['orr'],
 
-    ['nadh', 'fad'],    # 2-item combinations
+    ['nadh', 'fad'],
     ['nadh', 'shg'],
-    ['nadh', 'orr'],
     ['fad', 'shg'],
-    ['fad', 'orr'],
-    ['shg', 'orr'],
 
-    ['nadh', 'fad', 'shg'], # 3-item combinations
-    ['nadh', 'fad', 'orr'],
-    ['nadh', 'shg', 'orr'],
-    ['fad', 'shg', 'orr'],
-
-    ['nadh', 'fad', 'shg', 'orr']   # 4-item combination
+    ['nadh', 'fad', 'shg']
 ]
 
 models = []
@@ -235,18 +227,15 @@ for i in range(3,4):
                 for img, target, sample_ids in test_loaders[i]:
                     img = img.to(device)
                     y = model(img).squeeze().cpu()
+                    y = y.numpy().astype(np.float64).tolist()
 
-                    # Mask out NaN values
-                    valid_mask = ~torch.isnan(y)    # get a mask of non-NaN values
-                    y_valid = y[valid_mask].numpy().astype(np.float64).tolist()
-                    target_valid = target[valid_mask].cpu().numpy().astype(np.float64).tolist()
-                    sample_ids_valid = [sid for sid, valid in zip(sample_ids, valid_mask) if valid.item()]
+                    for id_name, target_name in zip(sample_ids, target):
+                        sample_targets[id_name].append(target_name.item())
 
-                    for id_name, target_val in zip(sample_ids_valid, target_valid):
-                        sample_targets[id_name].append(target_val)
-
-                    ys.append(y_valid)
-                    targets.append(target_valid)
+                    target = target.cpu()
+                    target = target.numpy().astype(np.float64).tolist()
+                    ys.append(y)
+                    targets.append(target)
 
                 averaged_targets = {}
                 for sample_id, target_list in sample_targets.items():
