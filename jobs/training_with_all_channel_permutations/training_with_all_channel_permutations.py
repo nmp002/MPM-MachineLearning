@@ -208,6 +208,8 @@ for i in range(3,4):
             if invalid_targets.numel() > 0:
                 print(f'Found invalid model targets: {invalid_targets}')
 
+            print(f'Out for Epoch {epoch+1}: {out}')
+            print(f'Target for Epoch {epoch+1}: {target}')
             loss = loss_fn(out, target)
 
             loss.backward()
