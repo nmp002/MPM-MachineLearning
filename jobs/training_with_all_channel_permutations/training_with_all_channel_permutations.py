@@ -200,12 +200,12 @@ for i in range(len(models)):
             if invalid_targets.numel() > 0:
                 print(f'Found invalid model targets: {invalid_targets}')
 
-            print(f'Out for Epoch {epoch+1}: {out}')
-            print(f'Target for Epoch {epoch+1}: {target}')
+            # print(f'Out for Epoch {epoch+1}: {out}')
+            # print(f'Target for Epoch {epoch+1}: {target}')
 
-            if torch.isnan(out).any:
-                print(f'NaN detected -- skipping this batch')
-                continue
+            # if torch.isnan(out).any:
+            #     print(f'NaN detected -- skipping this batch')
+            #     continue
 
             loss = loss_fn(out, target)
 
