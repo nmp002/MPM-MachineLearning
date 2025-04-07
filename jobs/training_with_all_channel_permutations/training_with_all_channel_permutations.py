@@ -103,12 +103,21 @@ channel_set = [
     ['nadh'],
     ['fad'],
     ['shg'],
+    ['orr'],
 
     ['nadh', 'fad'],
     ['nadh', 'shg'],
+    ['nadh', 'orr'],
     ['fad', 'shg'],
+    ['fad', 'orr'],
+    ['shg', 'orr'],
 
-    ['nadh', 'fad', 'shg']
+    ['nadh', 'fad', 'shg'],
+    ['nadh', 'fad', 'orr'],
+    ['nadh', 'shg', 'orr'],
+    ['fad', 'shg', 'orr'],
+
+    ['nadh', 'fad', 'shg', 'orr']
 ]
 
 models = []
