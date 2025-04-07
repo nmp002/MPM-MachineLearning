@@ -100,24 +100,24 @@ def get_indices_by_sample_ids(img_labels, sample_ids_set):
 
 # ORR maps excluded from channels for now -- too many NaN values
 channel_set = [
-    ['nadh'],
-    ['fad'],
-    ['shg'],
-    ['orr'],
+    ['nadh'],   # Model 1
+    ['fad'],    # Model 2
+    ['shg'],    # Model 3
+    ['orr'],    # Model 4
 
-    ['nadh', 'fad'],
-    ['nadh', 'shg'],
-    ['nadh', 'orr'],
-    ['fad', 'shg'],
-    ['fad', 'orr'],
-    ['shg', 'orr'],
+    ['nadh', 'fad'],    # Model 5
+    ['nadh', 'shg'],    # Model 6
+    ['nadh', 'orr'],    # Model 7
+    ['fad', 'shg'],     # Model 8
+    ['fad', 'orr'],     # Model 9
+    ['shg', 'orr'],     # Model 10
 
-    ['nadh', 'fad', 'shg'],
-    ['nadh', 'fad', 'orr'],
-    ['nadh', 'shg', 'orr'],
-    ['fad', 'shg', 'orr'],
+    ['nadh', 'fad', 'shg'], # Model 11
+    ['nadh', 'fad', 'orr'], # Model 12
+    ['nadh', 'shg', 'orr'], # Model 13
+    ['fad', 'shg', 'orr'],  # Model 14
 
-    ['nadh', 'fad', 'shg', 'orr']
+    ['nadh', 'fad', 'shg', 'orr']   # Model 15
 ]
 
 models = []
