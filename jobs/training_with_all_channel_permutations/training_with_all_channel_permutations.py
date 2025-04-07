@@ -41,12 +41,8 @@ set_seed()
 
 # HYPERPARAMETERS
 batch_size = 16
-epochs = 502
+epochs = 500
 learning_rate = 1e-6
-
-# SET SPLITS
-val_split = 0.17
-test_split = 0.13
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -106,7 +102,7 @@ channel_set = [
     ['nadh'],   # 1-item combinations
     ['fad'],
     ['shg'],
-    # ['orr'],
+    ['orr'],
 
     ['nadh', 'fad'],    # 2-item combinations
     ['nadh', 'shg'],
@@ -186,11 +182,11 @@ for channels in channel_set:
 
 for i in range(3,4):
     with open(results_file, 'a') as f:
-        f.write(f'Training model_{i+1}:\n')
+        f.write(f'\nTraining model_{i+1}:\n')
         f.write(f'Channel Inputs: {channel_set[i]}\n')
 
     for epoch in range(epochs):
-        if (epoch+1) % 10 == 0:
+        if (epoch+1) == 1 or (epoch+1) % 25 == 0:
             with open(results_file, 'a') as f:
                 f.write(f'Epoch {epoch+1}/{epochs}\n')
 
