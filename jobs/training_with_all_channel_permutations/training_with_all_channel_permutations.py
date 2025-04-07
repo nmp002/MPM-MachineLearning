@@ -172,7 +172,7 @@ for channels in channel_set:
 # TRAINING LOOP
 # ==================================
 
-for i in range(3,4):
+for i in range(len(models)):
     with open(results_file, 'a') as f:
         f.write(f'\nTraining model_{i+1}:\n')
         f.write(f'Channel Inputs: {channel_set[i]}\n')
