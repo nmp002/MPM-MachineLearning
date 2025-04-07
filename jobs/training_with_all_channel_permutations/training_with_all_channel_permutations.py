@@ -130,10 +130,13 @@ test_loaders = []
 
 train_ids = ['Sample_001', 'Sample_002', 'Sample_003', 'Sample_004', 'Sample_005', 'Sample_006',
  'Sample_013', 'Sample_014', 'Sample_015', 'Sample_016', 'Sample_017', 'Sample_018',
- 'Sample_019', 'Sample_020', 'Sample_022', 'Sample_023', 'Sample_024', 'Sample_025',
- 'Sample_026', 'Sample_027', 'Sample_028', 'Sample_029', 'Sample_030']
+ 'Sample_019', 'Sample_020', 'Sample_022', 'Sample_023', 'Sample_024']
 
-test_ids = ['Sample_007', 'Sample_008', 'Sample_009', 'Sample_010', 'Sample_011', 'Sample_012']
+# test_ids = ['Sample_001', 'Sample_002', 'Sample_003','Sample_004','Sample_005', 'Sample_006']    # Fold 1
+# test_ids = ['Sample_007', 'Sample_008', 'Sample_009', 'Sample_010', 'Sample_011', 'Sample_012']  # Fold 2
+# test_ids = ['Sample_013', 'Sample_014', 'Sample_015', 'Sample_016', 'Sample_017', 'Sample_018']  # Fold 3
+# test_ids = ['Sample_019', 'Sample_020', 'Sample_022', 'Sample_023', 'Sample_024']                # Fold 4
+test_ids = ['Sample_025', 'Sample_026', 'Sample_027', 'Sample_028', 'Sample_029', 'Sample_030']  # Fold 5
 
 for channels in channel_set:
     in_channels = len(channels)
@@ -181,7 +184,7 @@ for channels in channel_set:
 # TRAINING LOOP
 # ==================================
 
-for i in range(3,4):
+for i in range(len(models)):
     with open(results_file, 'a') as f:
         f.write(f'\nTraining model_{i+1}:\n')
         f.write(f'Channel Inputs: {channel_set[i]}\n')
