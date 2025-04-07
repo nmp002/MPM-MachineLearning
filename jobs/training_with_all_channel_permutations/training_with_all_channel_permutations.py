@@ -106,7 +106,7 @@ channel_set = [
     ['nadh'],   # 1-item combinations
     ['fad'],
     ['shg'],
-    ['orr'],
+    # ['orr'],
 
     ['nadh', 'fad'],    # 2-item combinations
     ['nadh', 'shg'],
