@@ -210,6 +210,11 @@ for i in range(3,4):
 
             print(f'Out for Epoch {epoch+1}: {out}')
             print(f'Target for Epoch {epoch+1}: {target}')
+
+            if torch.isnan(out).any:
+                print(f'NaN detected -- skipping this batch')
+                continue
+
             loss = loss_fn(out, target)
 
             loss.backward()
