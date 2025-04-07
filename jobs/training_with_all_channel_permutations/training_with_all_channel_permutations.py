@@ -223,7 +223,7 @@ for i in range(3,4):
         # Test the model at the 500th epoch
         if (epoch+1) % 500 == 0:
             with open(results_file, 'a') as f:
-                f.write(f'Testing model_{i+1}:\n')
+                f.write(f'\nTesting model_{i+1}...\n')
 
             # Save the model used for testing
             torch.save(model.state_dict(), f'model_{i+1}_epoch{epoch+1}.pt')
@@ -234,17 +234,19 @@ for i in range(3,4):
                 sample_targets = defaultdict(list)
                 for img, target, sample_ids in test_loaders[i]:
                     img = img.to(device)
-                    y = model(img).squeeze()
-                    y = y.cpu()
-                    y = y.numpy().astype(np.float64).tolist()
+                    y = model(img).squeeze().cpu()
 
-                    for id_name, target_name in zip(sample_ids, target):
-                        sample_targets[id_name].append(target_name.item())
+                    # Mask out NaN values
+                    valid_mask = ~torch.isnan(y)    # get a mask of non-NaN values
+                    y_valid = y[valid_mask].numpy().astype(np.float64).tolist()
+                    target_valid = target[valid_mask].cpu().numpy().astype(np.float64).tolist()
+                    sample_ids_valid = [sid for sid, valid in zip(sample_ids, valid_mask) if valid.item()]
 
-                    target = target.cpu()
-                    target = target.numpy().astype(np.float64).tolist()
-                    ys.append(y)
-                    targets.append(target)
+                    for id_name, target_val in zip(sample_ids_valid, target_valid):
+                        sample_targets[id_name].append(target_val)
+
+                    ys.append(y_valid)
+                    targets.append(target_valid)
 
                 averaged_targets = {}
                 for sample_id, target_list in sample_targets.items():
