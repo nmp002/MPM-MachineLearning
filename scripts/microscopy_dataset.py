@@ -13,6 +13,7 @@ from pathlib import Path
 def tiff_to_tensor(path):
     img = tifffile.imread(path) # Returns a numpy array
     img_tensor = torch.from_numpy(img).float()  # Convert NumPy array to tensor
+    img_tensor = torch.nan_to_num(img_tensor, nan=1.0, posinf=1.0, neginf=0.0)  # Replace non-valid numbers
     if img_tensor.dim() == 2:  # If grayscale, add channel dimension
         img_tensor = img_tensor.unsqueeze(0)
     return img_tensor
