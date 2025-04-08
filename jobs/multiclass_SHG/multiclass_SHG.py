@@ -19,7 +19,7 @@ from scipy.special import softmax
 # ==================================
 # PRESETS/PARAMETERS CONFIGURATION
 # ==================================
-channels = ['nadh', 'shg']
+channels = ['nadh', 'shg', 'orr']
 in_channels = len(channels)
 data_dir = "data/newData"
 labels_csv = "data/newData/labels.csv"
@@ -193,7 +193,7 @@ for epoch in range(epochs):
         target = target.long()
         optimizer.zero_grad()
         out = model(x)
-        if (epoch+1) % 5 == 0:
+        if (epoch+1) % 50 == 0:
             with open(results_file, 'a') as f:
                 f.write(f'Output, Epoch_{epoch+1}: {out}\n')
                 f.write(f'Target, Epoch_{epoch+1}: {target}\n')
