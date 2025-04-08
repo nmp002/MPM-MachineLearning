@@ -205,7 +205,7 @@ for epoch in range(epochs):
 # TESTING
 # ==================================
 
-    if (epoch+1) % 10 == 0:
+    if (epoch+1) % 50==0:
         # Save the trained model every 250 epochs
         # torch.save(model.state_dict(), f"multiclass_model_epoch{epoch+1}.pt")
         with torch.no_grad():
@@ -230,7 +230,7 @@ for epoch in range(epochs):
             targets_reshaped = targets.reshape(num_samples, 5)
 
             # Average predictions and targets across FOVs
-            sample_preds = np.mean(ys_reshaped, axis=1)
+            sample_preds = np.max(ys_reshaped, axis=1)
             sample_targets = np.mean(targets_reshaped, axis=1)
             sample_targets = sample_targets.astype(int)
 
