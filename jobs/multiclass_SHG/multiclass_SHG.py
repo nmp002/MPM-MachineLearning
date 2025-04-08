@@ -111,32 +111,37 @@ train_dataset = MicroscopyDataset(
 # SAMPLE-BASED SPLITTING
 # ==================================
 # Split the sample_ids into train, val, and test sets
-train_ids = ['Sample_002', 'Sample_003', 'Sample_006', 'Sample_007', 'Sample_008', 'Sample_010', 'Sample_011',
- 'Sample_013', 'Sample_014', 'Sample_015', 'Sample_016', 'Sample_017', 'Sample_018',
- 'Sample_019', 'Sample_020', 'Sample_022', 'Sample_024', 'Sample_025',
- 'Sample_026', 'Sample_027', 'Sample_028', 'Sample_029', 'Sample_030']
+train_ids = ['Sample_020', 'Sample_025', 'Sample_004', 'Sample_026', 'Sample_014',
+ 'Sample_019', 'Sample_008', 'Sample_006', 'Sample_030', 'Sample_028',
+ 'Sample_003', 'Sample_022', 'Sample_002', 'Sample_027', 'Sample_013']
 
 
-test_ids = ['Sample_004', 'Sample_012', 'Sample_009', 'Sample_023', 'Sample_005', 'Sample_001']
-      #RS:    0-15            0-15          16-25        26-40         41-55         56-100
+val_ids = ['Sample_012', 'Sample_018', 'Sample_024', 'Sample_029', 'Sample_017', 'Sample_007', 'Sample_010']
+
+
+test_ids = ['Sample_011', 'Sample_016', 'Sample_009', 'Sample_015', 'Sample_023', 'Sample_005', 'Sample_001']
 
 
 # Create lists of indices for each split
 train_indices = get_indices_by_sample_ids(train_dataset.img_labels, set(train_ids))
+val_indices = get_indices_by_sample_ids(dataset.img_labels, set(val_ids))
 test_indices = get_indices_by_sample_ids(dataset.img_labels, set(test_ids))
 
 with open(results_file, 'a') as f:
     f.write(f'Training Indices ({len(train_indices)}): {train_indices}\n')
+    f.write(f'Validation Indices ({len(val_indices)}): {val_indices}\n')
     f.write(f'Test Indices ({len(test_indices)}): {test_indices}\n')
 
 # Create dataset subsets
 train_dataset = Subset(train_dataset, train_indices)
+val_dataset = Subset(dataset, val_indices)
 test_dataset = Subset(dataset, test_indices)
 
 # ==================================
 # DATALOADERS
 # ==================================
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 # =========================================
@@ -168,7 +173,7 @@ def score_em(t, o):
         roc_auc = auc(fpr, tpr)
         RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc).plot()
         plt.title(f"ROC Curve - Class {i}")
-        plt.savefig(f'Epoch_{epoch + 1}_roc_class_{i}.png')
+        plt.savefig(f'Epoch_{epoch + 1}_roc_class_{i+1}.png')
 
 
 # ==================================
@@ -202,6 +207,23 @@ for epoch in range(epochs):
     train_losses.append(train_loss)
 
 # ==================================
+# VALIDATION
+# ==================================
+
+    model.eval()
+    val_running_loss = 0.0
+    with torch.no_grad():
+        for x_val, target_val, _ in val_loader:
+            x_val, target_val = x_val.to(device), target_val.to(device)
+            target_val = target_val.long()
+            out_val = model(x_val)
+            val_loss = loss_fn(out_val, target_val)
+            val_running_loss += val_loss.item()
+
+    val_loss = val_running_loss / len(val_dataset)
+    val_losses.append(val_loss)
+
+# ==================================
 # TESTING
 # ==================================
 
@@ -230,7 +252,7 @@ for epoch in range(epochs):
             targets_reshaped = targets.reshape(num_samples, 5)
 
             # Average predictions and targets across FOVs
-            sample_preds = np.max(ys_reshaped, axis=1)
+            sample_preds = np.mean(ys_reshaped, axis=1)
             sample_targets = np.mean(targets_reshaped, axis=1)
             sample_targets = sample_targets.astype(int)
 
