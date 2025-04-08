@@ -258,7 +258,7 @@ for epoch in range(epochs):
             targets = np.concatenate(targets)
 
             num_samples = len(ys) // 5
-            ys_reshaped = ys.reshape(num_samples, 5, 5)
+            ys_reshaped = ys.reshape(num_samples, 5, 4)
             targets_reshaped = targets.reshape(num_samples, 5)
 
             # Average predictions and targets across FOVs
