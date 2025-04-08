@@ -8,13 +8,13 @@
 
 import torch.nn as nn
 
-class classificationModel(nn.Module):
+class multiclassCNN(nn.Module):
     def __init__(self, in_channels=4):
         """
         in_channels: number of input channels (e.g., 1 for FAD only, 2 for FAD+NADH, etc.)
         task: 'regression' or 'classification'
         """
-        super(classificationModel, self).__init__()
+        super(multiclassCNN, self).__init__()
         # Statics
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool2d(2, 2)
