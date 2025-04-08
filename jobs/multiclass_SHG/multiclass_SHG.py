@@ -185,6 +185,7 @@ for epoch in range(epochs):
     running_loss = 0.0
     for x, target, _ in train_loader:
         x, target = x.to(device), target.to(device)
+        target = target.long()
         optimizer.zero_grad()
         out = model(x)
         if (epoch+1) % 5 == 0:
@@ -205,12 +206,13 @@ for epoch in range(epochs):
 
     if (epoch+1) % 10 == 0:
         # Save the trained model every 250 epochs
-        torch.save(model.state_dict(), f"multiclass_model_epoch{epoch+1}.pt")
+        # torch.save(model.state_dict(), f"multiclass_model_epoch{epoch+1}.pt")
         with torch.no_grad():
             model.eval()
             ys, targets = [], []
             for img, target, _ in test_loader:
                 img, target = img.to(device), target.to(device)
+                target = target.long()
                 y = model(img)
                 y = y.cpu().numpy()
                 # y = y.numpy().astype(np.float64).tolist()
