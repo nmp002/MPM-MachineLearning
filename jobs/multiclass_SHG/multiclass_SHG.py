@@ -111,15 +111,14 @@ train_dataset = MicroscopyDataset(
 # SAMPLE-BASED SPLITTING
 # ==================================
 # Split the sample_ids into train, val, and test sets
-train_ids = ['Sample_001', 'Sample_002', 'Sample_003', 'Sample_004', 'Sample_005', 'Sample_006',
+train_ids = ['Sample_002', 'Sample_003', 'Sample_006', 'Sample_007', 'Sample_008', 'Sample_010', 'Sample_011',
  'Sample_013', 'Sample_014', 'Sample_015', 'Sample_016', 'Sample_017', 'Sample_018',
- 'Sample_019', 'Sample_020', 'Sample_022', 'Sample_023', 'Sample_024', 'Sample_025',
+ 'Sample_019', 'Sample_020', 'Sample_022', 'Sample_024', 'Sample_025',
  'Sample_026', 'Sample_027', 'Sample_028', 'Sample_029', 'Sample_030']
 
 
-test_ids = ['Sample_007', 'Sample_008', 'Sample_009', 'Sample_010', 'Sample_011', 'Sample_012']
-
-test_ids = ['Sample_004', ]
+test_ids = ['Sample_004', 'Sample_012', 'Sample_009', 'Sample_023', 'Sample_005', 'Sample_001']
+      #RS:    0-15            0-15          16-25        26-40         41-55         56-100
 
 
 # Create lists of indices for each split
