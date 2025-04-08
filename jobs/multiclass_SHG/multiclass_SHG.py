@@ -228,6 +228,17 @@ for epoch in range(epochs):
 # ==================================
 
     if (epoch+1) % 50==0:
+
+        plt.figure()
+        plt.plot(range(1, len(train_losses) + 1), train_losses, label='Train Loss')
+        plt.plot(range(1, len(val_losses) + 1), val_losses, label='Val Loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.title('Training vs Validation Loss')
+        plt.legend()
+        plt.savefig(f'loss_plot_epoch_{epoch + 1}.png')
+        plt.close()
+
         # Save the trained model every 250 epochs
         # torch.save(model.state_dict(), f"multiclass_model_epoch{epoch+1}.pt")
         with torch.no_grad():
