@@ -34,7 +34,7 @@ class multiclassCNN(nn.Module):
         # Fully connected layers
         self.fc1 = nn.Linear(64 * 64 * 64, 128)  # Adjusted based on the size of the output after pooling
         self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, 5)  # Multi-class classification output
+        self.fc3 = nn.Linear(64, 4)  # Multi-class classification output
 
     def forward(self, x):
         x = self.conv1(x)

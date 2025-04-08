@@ -27,8 +27,7 @@ label_fn = lambda x: torch.tensor(
     0 if 0 <= x <= 15 else   # Low Risk
     1 if 16 <= x <= 25 else  # Low to Medium Risk
     2 if 26 <= x <= 40 else  # Medium Risk
-    3 if 41 <= x <= 55 else  # High Risk
-    4                        # Very High Risk
+    3                        # High Risk
 )
 
 def set_seed(seed: int = 42) -> None:
@@ -167,8 +166,8 @@ def score_em(t, o):
     plt.savefig(f'Epoch_{epoch + 1}_confusion_matrix.png')
 
     # ROC & AUC (per class)
-    true_bin = label_binarize(true, classes=[0, 1, 2, 3, 4])
-    for i in range(5):
+    true_bin = label_binarize(true, classes=[0, 1, 2, 3])
+    for i in range(4):
         fpr, tpr, _ = roc_curve(true_bin[:, i], probs[:, i])
         roc_auc = auc(fpr, tpr)
         RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc).plot()
