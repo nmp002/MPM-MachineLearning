@@ -19,7 +19,7 @@ from scipy.special import softmax
 # ==================================
 # PRESETS/PARAMETERS CONFIGURATION
 # ==================================
-channels = ['nadh', 'shg', 'orr']
+channels = ['nadh', 'shg', 'orr', 'fad']
 in_channels = len(channels)
 data_dir = "data/newData"
 labels_csv = "data/newData/labels.csv"
