@@ -25,9 +25,9 @@ data_dir = "data/newData"
 labels_csv = "data/newData/labels.csv"
 label_fn = lambda x: torch.tensor(
     0 if 0 <= x <= 15 else   # Low Risk
-    1 if 16 <= x <= 20 else  # Low to Medium Risk
-    2 if 21 <= x <= 25 else  # Medium Risk
-    3 if 26 <= x <= 40 else  # High Risk
+    1 if 16 <= x <= 25 else  # Low to Medium Risk
+    2 if 26 <= x <= 40 else  # Medium Risk
+    3 if 41 <= x <= 55 else  # High Risk
     4                        # Very High Risk
 )
 
@@ -118,6 +118,8 @@ train_ids = ['Sample_001', 'Sample_002', 'Sample_003', 'Sample_004', 'Sample_005
 
 
 test_ids = ['Sample_007', 'Sample_008', 'Sample_009', 'Sample_010', 'Sample_011', 'Sample_012']
+
+test_ids = ['Sample_004', ]
 
 
 # Create lists of indices for each split
