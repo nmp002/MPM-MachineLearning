@@ -222,7 +222,7 @@ for i in range(len(models)):
         model.eval()
         val_running_loss = 0.0
         with torch.no_grad():
-            for x, target, _ in val_loader[i]:
+            for x, target, _ in val_loaders[i]:
                 x, target = x.to(device), target.to(device)
                 out = model(x).squeeze()
                 loss = loss_fn(out, target)
