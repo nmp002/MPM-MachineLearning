@@ -227,7 +227,7 @@ for i in range(len(models)):
             optimizer.step()
 
         # Test the model at the 500th epoch
-        if (epoch+1) % 5 == 0:
+        if (epoch+1) % 500 == 0:
             with open(results_file, 'a') as f:
                 f.write(f'\nTesting model_{i+1}...\n')
 
