@@ -73,17 +73,30 @@ with open(results_file, 'w') as f:
 # DEFINE SCORING FUNCTION
 # ==================================
 # Function to calculate scores and plot roc curve/confusion matrix
-def score_em(t, o):
+def score_em(t, o, sample_ids=None):
     fpr, tpr, thresholds = roc_curve(t, o)
     test_score = auc(fpr, tpr)
     thresh = thresholds[np.argmax(tpr - fpr)]
     preds = [out_value >= thresh for out_value in o]
+
+    print(f"\nThreshold used: {thresh:.3f} | Test AUC: {test_score:.3f}")
+
+    if sample_ids is not None:
+        with open(results_file, 'a') as f:
+            f.write('\n=== Sample Predictions ===\n')
+        for sid, true_label, pred_score in zip(sample_ids, t, o):
+            pred_class = int(pred_score >= thresh)
+            with open(results_file, 'a') as f:
+                f.write(f"{sid}: Predicted={pred_class} (score={pred_score:.3f}), True={int(true_label)}")
+
     roc_display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=test_score)
     roc_display.plot()
     plt.savefig(f'Model_{i+1}_epoch{epoch + 1}_roc_curve.png')
+
     conf_matrix = ConfusionMatrixDisplay.from_predictions(t, preds)
     conf_matrix.plot()
     plt.savefig(f'Model_{i+1}_epoch{epoch + 1}_confusion_matrix.png')
+
 
 
 # Function to get indices of img_labels belonging to a given set of sample_ids
@@ -225,7 +238,7 @@ for i in range(len(models)):
             optimizer.step()
 
         # Test the model at the 500th epoch
-        if (epoch+1) % 500 == 0:
+        if (epoch+1) % 5 == 0:
             with open(results_file, 'a') as f:
                 f.write(f'\nTesting model_{i+1}...\n')
 
@@ -262,6 +275,11 @@ for i in range(len(models)):
                 # targets = [item for target in targets for item in target]
                 # sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
                 # score_em(targets, ys)
-                score_em(list(averaged_targets.values()), sample_ys)
+                score_em(
+                    list(averaged_targets.values()),
+                    list(sample_ys.values()),
+                    sample_ids=list(sample_ys.keys())
+                )
+
 
 
