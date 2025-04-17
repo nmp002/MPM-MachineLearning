@@ -272,9 +272,11 @@ for i in range(len(models)):
 
                 ys = [item for y in ys for item in y]
                 sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
-                # targets = [item for target in targets for item in target]
-                # sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
-                # score_em(targets, ys)
+                # Match predictions to sample_ids in order
+                pred_array = np.array(ys).reshape(-1, 5)
+                for idx, sample_id in enumerate(sample_ids):
+                    sample_ys[sample_id] = np.mean(pred_array[idx])
+
                 score_em(
                     list(averaged_targets.values()),
                     list(sample_ys.values()),
