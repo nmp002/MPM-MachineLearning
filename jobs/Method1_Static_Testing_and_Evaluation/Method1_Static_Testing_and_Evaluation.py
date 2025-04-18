@@ -232,7 +232,7 @@ for i in range(len(models)):
                 epoch_val_loss += loss.item()
                 num_val_batches += 1
 
-            avg_val_loss = epoch_val_loss / len(train_loaders[i])
+            avg_val_loss = epoch_val_loss / len(val_loaders[i])
             val_losses.append(avg_val_loss)
 
 
