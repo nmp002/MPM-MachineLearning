@@ -237,7 +237,7 @@ for i in range(len(models)):
 
 
         # Plot loss curves at specified epochs
-        if (epoch+1) % 5 ==0:
+        if (epoch+1) % 100 ==0:
             fig, ax = plt.subplots(figsize=(6, 4))
             ax.plot(train_losses, label='Training Loss')
             ax.plot(val_losses, label='Validation Loss')
