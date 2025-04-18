@@ -185,30 +185,45 @@ for i in range(len(models)):
 
     train_losses = []
     val_losses = []
-
     for epoch in range(epochs):
+        if (epoch+1) == 1 or (epoch+1) % 25 == 0:
+            with open(results_file, 'a') as f:
+                f.write(f'Epoch {epoch+1}/{epochs}\n')
+
+        model = models[i]
+        optimizer = optimizers[i]
+        loss_fn = loss_fns[i]
+
+        # Train the model
         model.train()
         epoch_train_loss = 0.0
         num_train_batches = 0
-
         for x, target, _ in train_loaders[i]:
             x, target = x.to(device), target.to(device)
             optimizer.zero_grad()
             out = model(x).squeeze()
-            loss = loss_fn(out, target)
-            loss.backward()
-            optimizer.step()
 
+            invalid_outs = out[(out < 0) | (out > 1)]
+            if invalid_outs.numel() > 0 or torch.isnan(out).any():
+                print(f'Found invalid model outputs: {invalid_outs}')
+            invalid_targets = target[(target < 0) | (target > 1)]
+            if invalid_targets.numel() > 0:
+                print(f'Found invalid model targets: {invalid_targets}')
+
+
+            loss = loss_fn(out, target)
             epoch_train_loss += loss.item()
             num_train_batches += 1
+            loss.backward()
+            optimizer.step()
 
         avg_train_loss = epoch_train_loss / num_train_batches
         train_losses.append(avg_train_loss)
 
+        ## Validation ##
         model.eval()
         epoch_val_loss = 0.0
         num_val_batches = 0
-
         with torch.no_grad():
             for x, target, _ in val_loaders[i]:
                 x, target = x.to(device), target.to(device)
@@ -217,11 +232,12 @@ for i in range(len(models)):
                 epoch_val_loss += loss.item()
                 num_val_batches += 1
 
-        avg_val_loss = epoch_val_loss / num_val_batches
-        val_losses.append(avg_val_loss)
+            avg_val_loss = epoch_val_loss / num_val_batches
+            val_losses.append(avg_val_loss)
 
-        # Save loss curves every 50 epochs
-        if (epoch + 1) % 5 == 0:
+
+        # Plot loss curves at specified epochs
+        if (epoch+1) % 5 ==0:
             fig, ax = plt.subplots(figsize=(6, 4))
             ax.plot(train_losses, label='Training Loss')
             ax.plot(val_losses, label='Validation Loss')
@@ -232,6 +248,14 @@ for i in range(len(models)):
             fig.tight_layout()
             fig.savefig(f'model_{i + 1}_loss_epoch{epoch + 1}.png')
             plt.close(fig)
+
+        # Test the model at the 500th epoch
+        if (epoch+1) % 500 == 0:
+            with open(results_file, 'a') as f:
+                f.write(f'\nTesting model_{i+1}...\n')
+
+            # Save the model used for testing
+            torch.save(model.state_dict(), f'model_{i+1}_epoch{epoch+1}.pt')
 
             ## Testing ##
             with torch.no_grad():
