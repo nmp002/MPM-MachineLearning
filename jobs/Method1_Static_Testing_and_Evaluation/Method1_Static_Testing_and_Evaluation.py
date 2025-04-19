@@ -63,8 +63,8 @@ class AddGaussianNoise:
 
 # Transformations for training set
 train_transform = tvt.Compose([
-    tvt.RandomVerticalFlip(p=0.5),
-    tvt.RandomHorizontalFlip(p=0.5),
+    tvt.RandomVerticalFlip(p=0.25),
+    tvt.RandomHorizontalFlip(p=0.25),
     tvt.RandomRotation(degrees=(-180, 180)),
     tvt.RandomResizedCrop(size=512, scale=(0.8, 1.0))  # Random zoom-in
 ])
