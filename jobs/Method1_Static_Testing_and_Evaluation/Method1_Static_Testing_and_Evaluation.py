@@ -135,7 +135,7 @@ val_loaders = []
 test_loaders = []
 
 train_ids = ['Sample_019', 'Sample_015', 'Sample_011', 'Sample_024', 'Sample_005', 'Sample_007', 'Sample_006', 'Sample_013', 'Sample_009', 'Sample_016', 'Sample_010',
-             'Sample_026', 'Sample_028', 'Sample_030', 'Sample_017', 'Sample_029', 'Sample_027', 'Sample_014', 'Sample_003', 'Sample_018']
+             'Sample_026', 'Sample_028', 'Sample_030', 'Sample_017', 'Sample_027', 'Sample_014', 'Sample_003', 'Sample_018']        # 'Sample_029' sitting out
 
 val_ids = ['Sample_020', 'Sample_023', 'Sample_002', 'Sample_008', 'Sample_012']
 
