@@ -200,8 +200,9 @@ for i in range(len(models)):
     train_losses = []
     val_losses = []
     best_val_loss = float('inf')
-    patience = 20
+    patience = 40
     patience_counter = 0
+    early_stopping = False
     best_model_path = f'model_{i+1}_best.pt'
     for epoch in range(epochs):
         if (epoch+1) == 1 or (epoch+1) % 25 == 0:
@@ -269,6 +270,7 @@ for i in range(len(models)):
 
                         f.write(f'\nTesting Model_{i+1}:\n')
 
+                    early_stopping = True
                     model.load_state_dict(torch.load(best_model_path))
 
                     ## Testing ##
@@ -307,14 +309,14 @@ for i in range(len(models)):
                     break
 
         # Plot loss curves at specified epochs
-        if (epoch+1) % 50 ==0:
+        if (epoch+1) % 50 ==0 or early_stopping:
             fig, ax = plt.subplots(figsize=(6, 4))
 
             # Plot raw training loss
             ax.plot(train_losses, label='Training Loss (Raw)', color='blue', alpha = 0.3)
 
             # smoothed training loss using a moving average
-            smoothed_train = pd.Series(train_losses).rolling(window=25, min_periods=1).mean()
+            smoothed_train = pd.Series(train_losses).rolling(window=30, min_periods=1).mean()
             ax.plot(smoothed_train, label='Training Loss (Smoothed)', color='blue', linewidth=2)
 
             # Plot validation loss
