@@ -130,7 +130,7 @@ test_ids = ['Sample_025', 'Sample_001', 'Sample_004', 'Sample_022']
 for channels in channel_set:
     in_channels = len(channels)
     model = classificationModel(in_channels=in_channels).to(device)
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.001)
     loss_fn = nn.BCELoss()
 
     dataset = MicroscopyDataset(
