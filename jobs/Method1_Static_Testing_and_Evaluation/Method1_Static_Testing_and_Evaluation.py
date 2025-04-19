@@ -137,10 +137,10 @@ train_loaders = []
 val_loaders = []
 test_loaders = []
 
-train_ids = ['Sample_019', 'Sample_015', 'Sample_011', 'Sample_024', 'Sample_023', 'Sample_007', 'Sample_006', 'Sample_013', 'Sample_012', 'Sample_016', 'Sample_010',
-             'Sample_026', 'Sample_020', 'Sample_30', 'Sample_017', 'Sample_028', 'Sample_002', 'Sample_014', 'Sample_003', 'Sample_018']
+train_ids = ['Sample_019', 'Sample_015', 'Sample_011', 'Sample_024', 'Sample_005', 'Sample_007', 'Sample_006', 'Sample_013', 'Sample_009', 'Sample_016', 'Sample_010',
+             'Sample_026', 'Sample_028', 'Sample_030', 'Sample_017', 'Sample_029', 'Sample_027', 'Sample_014', 'Sample_003', 'Sample_018']
 
-val_ids = ['Sample_029', 'Sample_005', 'Sample_027', 'Sample_008', 'Sample_009']
+val_ids = ['Sample_020', 'Sample_023', 'Sample_002', 'Sample_008', 'Sample_012']
 
 test_ids = ['Sample_025', 'Sample_001', 'Sample_004', 'Sample_022']
 
