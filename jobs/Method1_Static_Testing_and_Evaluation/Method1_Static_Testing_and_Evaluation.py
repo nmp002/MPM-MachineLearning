@@ -49,11 +49,28 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # ==================================
 # TRANSFORMS
 # ==================================
+# Custom noise transform
+class AddGaussianNoise:
+    def __init__(self, mean=0., std=0.05):
+        self.mean = mean
+        self.std = std
+
+    def __call__(self, tensor):
+        return tensor + torch.randn_like(tensor) * self.std + self.mean
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}(mean={self.mean}, std={self.std})'
+
 # Transformations for training set
 train_transform = tvt.Compose([
-    tvt.RandomVerticalFlip(p=0.25),
-    tvt.RandomHorizontalFlip(p=0.25),
-    tvt.RandomRotation(degrees=(-180, 180))])
+    tvt.RandomVerticalFlip(p=0.5),
+    tvt.RandomHorizontalFlip(p=0.5),
+    tvt.RandomRotation(degrees=(-180, 180)),
+    tvt.RandomResizedCrop(size=512, scale=(0.8, 1.0)),  # Random zoom-in
+    tvt.GaussianBlur(kernel_size=3, sigma=(0.1, 1.5)),  # Smooth edges, simulate focus variation
+    tvt.ToTensor(), # Must convert to tensor before applying noise
+    AddGaussianNoise(std=0.03)
+])
 
 # ==================================
 # RESULTS FILE CONFIGURATION
@@ -237,7 +254,7 @@ for i in range(len(models)):
 
 
         # Plot loss curves at specified epochs
-        if (epoch+1) % 100 ==0:
+        if (epoch+1) % 50 ==0:
             fig, ax = plt.subplots(figsize=(6, 4))
             ax.plot(train_losses, label='Training Loss')
             ax.plot(val_losses, label='Validation Loss')
