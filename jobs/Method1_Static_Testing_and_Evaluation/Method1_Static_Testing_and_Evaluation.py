@@ -200,7 +200,7 @@ for i in range(len(models)):
     train_losses = []
     val_losses = []
     best_val_loss = float('inf')
-    patience = 10
+    patience = 20
     patience_counter = 0
     best_model_path = f'model_{i+1}_best.pt'
     for epoch in range(epochs):
