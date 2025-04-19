@@ -234,7 +234,7 @@ for i in range(len(models)):
             loss.backward()
             optimizer.step()
 
-        avg_train_loss = epoch_train_loss / len(train_dataset)
+        avg_train_loss = epoch_train_loss / num_train_batches
         train_losses.append(avg_train_loss)
 
         ## Validation ##
@@ -249,7 +249,7 @@ for i in range(len(models)):
                 epoch_val_loss += loss.item()
                 num_val_batches += 1
 
-            avg_val_loss = epoch_val_loss / len(val_dataset)
+            avg_val_loss = epoch_val_loss / num_val_batches
             val_losses.append(avg_val_loss)
 
 
