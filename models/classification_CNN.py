@@ -24,12 +24,15 @@ class classificationModel(nn.Module):
 
         # First convolutional layer
         self.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.bn1 = nn.BatchNorm2d(16)
 
         # Second convolutional layer
         self.conv2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=1, padding=1)
+        self.bn2 = nn.BatchNorm2d(32)
 
         # Third convolutional layer
         self.conv3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.bn3 = nn.BatchNorm2d(64)
 
         # Fully connected layers
         self.fc1 = nn.Linear(64 * 64 * 64, 128)  # Adjusted based on the size of the output after pooling
@@ -38,14 +41,17 @@ class classificationModel(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
+        x = self.bn1(x)
         x = self.relu(x)
         x = self.pool(x)
 
         x = self.conv2(x)
+        x = self.bn2(x)
         x = self.relu(x)
         x = self.pool(x)
 
         x = self.conv3(x)
+        x = self.bn3(x)
         x = self.relu(x)
         x = self.pool(x)
 
