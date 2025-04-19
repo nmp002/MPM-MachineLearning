@@ -41,7 +41,7 @@ set_seed()
 
 # HYPERPARAMETERS
 batch_size = 16
-epochs = 800
+epochs = 2500
 learning_rate = 1e-6
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -135,7 +135,7 @@ val_loaders = []
 test_loaders = []
 
 train_ids = ['Sample_019', 'Sample_015', 'Sample_011', 'Sample_024', 'Sample_005', 'Sample_007', 'Sample_006', 'Sample_013', 'Sample_009', 'Sample_016', 'Sample_010',
-             'Sample_026', 'Sample_028', 'Sample_030', 'Sample_017', 'Sample_029', 'Sample_014', 'Sample_003', 'Sample_018']        # Sitting out 'Sample_027'
+             'Sample_026', 'Sample_028', 'Sample_030', 'Sample_017', 'Sample_029', 'Sample_027', 'Sample_014', 'Sample_003', 'Sample_018']
 
 val_ids = ['Sample_020', 'Sample_023', 'Sample_002', 'Sample_008', 'Sample_012']
 
@@ -251,7 +251,7 @@ for i in range(len(models)):
 
 
         # Plot loss curves at specified epochs
-        if (epoch+1) % 50 ==0:
+        if (epoch+1) % 250 ==0:
             fig, ax = plt.subplots(figsize=(6, 4))
             ax.plot(train_losses, label='Training Loss')
             ax.plot(val_losses, label='Validation Loss')
