@@ -19,7 +19,7 @@ class classificationModel(nn.Module):
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool2d(2, 2)
         self.flat = nn.Flatten()
-        self.drop = nn.Dropout(0.5)
+        self.drop = nn.Dropout(0.7)
         self.sigmoid = nn.Sigmoid()
 
         # First convolutional layer
