@@ -66,10 +66,7 @@ train_transform = tvt.Compose([
     tvt.RandomVerticalFlip(p=0.5),
     tvt.RandomHorizontalFlip(p=0.5),
     tvt.RandomRotation(degrees=(-180, 180)),
-    tvt.RandomResizedCrop(size=512, scale=(0.8, 1.0)),  # Random zoom-in
-    tvt.GaussianBlur(kernel_size=3, sigma=(0.1, 1.5)),  # Smooth edges, simulate focus variation
-    tvt.ToTensor(), # Must convert to tensor before applying noise
-    AddGaussianNoise(std=0.03)
+    tvt.RandomResizedCrop(size=512, scale=(0.8, 1.0))  # Random zoom-in
 ])
 
 # ==================================
