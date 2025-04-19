@@ -94,10 +94,10 @@ def score_em(t, o):
     preds = [out_value >= thresh for out_value in o]
     roc_display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=test_score)
     roc_display.plot()
-    plt.savefig(f'Model_{i+1}_epoch{epoch + 1}_roc_curve.png')
+    plt.savefig(f'Model_{i+1}_epoch{best_epoch + 1}_roc_curve.png')
     conf_matrix = ConfusionMatrixDisplay.from_predictions(t, preds)
     conf_matrix.plot()
-    plt.savefig(f'Model_{i+1}_epoch{epoch + 1}_confusion_matrix.png')
+    plt.savefig(f'Model_{i+1}_epoch{best_epoch + 1}_confusion_matrix.png')
 
 
 # Function to get indices of img_labels belonging to a given set of sample_ids
@@ -200,7 +200,7 @@ for i in range(len(models)):
     train_losses = []
     val_losses = []
     best_val_loss = float('inf')
-    patience = 40
+    patience = 60
     patience_counter = 0
     early_stopping = False
     best_model_path = f'model_{i+1}_best.pt'
@@ -258,6 +258,7 @@ for i in range(len(models)):
                 best_val_loss = avg_val_loss
                 patience_counter = 0
                 torch.save(model.state_dict(), best_model_path)
+                best_epoch = epoch
                 with open(results_file, 'a') as f:
                     f.write(f"✅ Epoch {epoch + 1}: Validation loss improved to {avg_val_loss:.6f}. Saving model.\n")
             else:
@@ -305,6 +306,29 @@ for i in range(len(models)):
                         # sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
                         # score_em(targets, ys)
                         score_em(list(averaged_targets.values()), sample_ys)
+
+                    fig, ax = plt.subplots(figsize=(6, 4))
+
+                    # Plot raw training loss
+                    ax.plot(train_losses, label='Training Loss (Raw)', color='blue', alpha=0.3)
+
+                    # smoothed training loss using a moving average
+                    smoothed_train = pd.Series(train_losses).rolling(window=30, min_periods=1).mean()
+                    ax.plot(smoothed_train, label='Training Loss (Smoothed)', color='blue', linewidth=2)
+
+                    # Plot validation loss
+                    ax.plot(val_losses, label='Validation Loss', color='orange', linewidth=2)
+
+                    # Red dashed line at best epoch
+                    ax.axvline(x=best_epoch, color='red', linestyle='--', linewidth=1.5, label = f'Best Epoch: {best_epoch}')
+
+                    ax.set_xlabel('Epoch')
+                    ax.set_ylabel('Loss')
+                    ax.set_title(f'Model {i + 1} Loss Curve')
+                    ax.legend()
+                    fig.tight_layout()
+                    fig.savefig(f'model_{i + 1}_loss_epoch{epoch + 1}.png')
+                    plt.close(fig)
 
                     break
 
