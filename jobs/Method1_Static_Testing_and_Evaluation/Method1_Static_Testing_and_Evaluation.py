@@ -199,6 +199,10 @@ for i in range(len(models)):
 
     train_losses = []
     val_losses = []
+    best_val_loss = float('inf')
+    patience = 5
+    patience_counter = 0
+    best_model_path = f'model_{i+1}_best.pt'
     for epoch in range(epochs):
         if (epoch+1) == 1 or (epoch+1) % 25 == 0:
             with open(results_file, 'a') as f:
@@ -248,7 +252,59 @@ for i in range(len(models)):
 
             avg_val_loss = epoch_val_loss / len(val_dataset)
             val_losses.append(avg_val_loss)
+            # Early stopping logic:
+            if avg_val_loss < best_val_loss:
+                best_val_loss = avg_val_loss
+                patience_counter = 0
+                torch.save(model.state_dict(), best_model_path)
+                with open(results_file, 'a') as f:
+                    f.write(f"✅ Epoch {epoch + 1}: Validation loss improved to {avg_val_loss:.6f}. Saving model.\n")
+            else:
+                patience_counter += 1
+                with open(results_file, 'a') as f:
+                    f.write(f"🔁 Epoch {epoch + 1}: No improvement in validation loss. Patience counter: {patience_counter}/{patience}\n")
+                if patience_counter >= patience:
+                    with open(results_file, 'a') as f:
+                        f.write(f"⏹️ Early stopping triggered at Epoch {epoch + 1}.\n")
 
+                        f.write(f'\nTesting Model_{i+1}:\n')
+
+                    model.load_state_dict(torch.load(best_model_path))
+
+                    ## Testing ##
+                    with torch.no_grad():
+                        model.eval()
+                        ys, targets = [], []
+                        sample_targets = defaultdict(list)
+                        for img, target, sample_ids in test_loaders[i]:
+                            img = img.to(device)
+                            y = model(img).squeeze().cpu()
+                            y = y.numpy().astype(np.float64).tolist()
+
+                            for id_name, target_name in zip(sample_ids, target):
+                                sample_targets[id_name].append(target_name.item())
+
+                            target = target.cpu()
+                            target = target.numpy().astype(np.float64).tolist()
+                            ys.append(y)
+                            targets.append(target)
+
+                        averaged_targets = {}
+                        for sample_id, target_list in sample_targets.items():
+                            if all(target == target_list[0] for target in target_list):
+                                averaged_targets[sample_id] = target_list[0]
+                            else:
+                                print(f'Warning: Inconsistent targets for {sample_id} -> {target_list}')
+                                epoch = epochs
+
+                        ys = [item for y in ys for item in y]
+                        sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
+                        # targets = [item for target in targets for item in target]
+                        # sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
+                        # score_em(targets, ys)
+                        score_em(list(averaged_targets.values()), sample_ys)
+
+                    break
 
         # Plot loss curves at specified epochs
         if (epoch+1) % 250 ==0:
@@ -263,45 +319,14 @@ for i in range(len(models)):
             fig.savefig(f'model_{i + 1}_loss_epoch{epoch + 1}.png')
             plt.close(fig)
 
-        # Test the model at the 500th epoch
-        if (epoch+1) % 500 == 0:
-            with open(results_file, 'a') as f:
-                f.write(f'\nTesting model_{i+1}...\n')
+        # # Test the model at the 500th epoch
+        # if (epoch+1) % 500 == 0:
+        #     with open(results_file, 'a') as f:
+        #         f.write(f'\nTesting model_{i+1}...\n')
+        #
+        #     # Save the model used for testing
+        #     torch.save(model.state_dict(), f'model_{i+1}_epoch{epoch+1}.pt')
 
-            # Save the model used for testing
-            torch.save(model.state_dict(), f'model_{i+1}_epoch{epoch+1}.pt')
 
-            ## Testing ##
-            with torch.no_grad():
-                model.eval()
-                ys, targets = [], []
-                sample_targets = defaultdict(list)
-                for img, target, sample_ids in test_loaders[i]:
-                    img = img.to(device)
-                    y = model(img).squeeze().cpu()
-                    y = y.numpy().astype(np.float64).tolist()
-
-                    for id_name, target_name in zip(sample_ids, target):
-                        sample_targets[id_name].append(target_name.item())
-
-                    target = target.cpu()
-                    target = target.numpy().astype(np.float64).tolist()
-                    ys.append(y)
-                    targets.append(target)
-
-                averaged_targets = {}
-                for sample_id, target_list in sample_targets.items():
-                    if all(target == target_list[0] for target in target_list):
-                        averaged_targets[sample_id] = target_list[0]
-                    else:
-                        print(f'Warning: Inconsistent targets for {sample_id} -> {target_list}')
-                        epoch = epochs
-
-                ys = [item for y in ys for item in y]
-                sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
-                # targets = [item for target in targets for item in target]
-                # sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
-                # score_em(targets, ys)
-                score_em(list(averaged_targets.values()), sample_ys)
 
 
