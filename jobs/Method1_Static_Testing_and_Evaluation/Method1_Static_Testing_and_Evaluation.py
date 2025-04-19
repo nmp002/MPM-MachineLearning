@@ -307,10 +307,18 @@ for i in range(len(models)):
                     break
 
         # Plot loss curves at specified epochs
-        if (epoch+1) % 250 ==0:
+        if (epoch+1) % 50 ==0:
             fig, ax = plt.subplots(figsize=(6, 4))
-            ax.plot(train_losses, label='Training Loss')
-            ax.plot(val_losses, label='Validation Loss')
+
+            # Plot raw training loss
+            ax.plot(train_losses, label='Training Loss (Raw)', color='blue', alpha = 0.3)
+
+            # smoothed training loss using a moving average
+            smoothed_train = pd.Series(train_losses).rolling(window=5, min_periods=1).mean()
+            ax.plot(smoothed_train, label='Training Loss (Smoothed)', color='blue', linewidth=2)
+
+            # Plot validation loss
+            ax.plot(val_losses, label='Validation Loss', color = 'orange', linewidth = 2)
             ax.set_xlabel('Epoch')
             ax.set_ylabel('Loss')
             ax.set_title(f'Model {i + 1} Loss Curve')
