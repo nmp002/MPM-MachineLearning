@@ -114,12 +114,12 @@ def get_indices_by_sample_ids(img_labels, sample_ids_set):
 
 # ORR maps excluded from channels for now -- too many NaN values
 channel_set = [
-    ['nadh'],   # Model 1
-    ['fad'],    # Model 2
-    ['shg'],    # Model 3
-    ['orr'],    # Model 4
-
-    ['nadh', 'shg'],    # Model 5
+    # ['nadh'],   # Model 1
+    # ['fad'],    # Model 2
+    # ['shg'],    # Model 3
+    # ['orr'],    # Model 4
+    #
+    # ['nadh', 'shg'],    # Model 5
 
 
     ['nadh', 'fad', 'shg', 'orr']   # Model 15
@@ -200,7 +200,7 @@ for i in range(len(models)):
     train_losses = []
     val_losses = []
     best_val_loss = float('inf')
-    patience = 60
+    patience = 150
     patience_counter = 0
     early_stopping = False
     best_model_path = f'model_{i+1}_best.pt'
