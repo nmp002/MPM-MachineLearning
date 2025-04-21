@@ -41,7 +41,7 @@ set_seed()
 
 # HYPERPARAMETERS
 batch_size = 16
-epochs = 500
+epochs = 1105
 learning_rate = 1e-6
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -50,10 +50,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # TRANSFORMS
 # ==================================
 # Transformations for training set
+# Transformations for training set
 train_transform = tvt.Compose([
     tvt.RandomVerticalFlip(p=0.25),
     tvt.RandomHorizontalFlip(p=0.25),
-    tvt.RandomRotation(degrees=(-180, 180))])
+    tvt.RandomRotation(degrees=(-180, 180)),
+    tvt.RandomResizedCrop(size=512, scale=(0.8, 1.0))  # Random zoom-in
+])
 
 # ==================================
 # RESULTS FILE CONFIGURATION
@@ -225,7 +228,7 @@ for i in range(len(models)):
             optimizer.step()
 
         # Test the model at the 500th epoch
-        if (epoch+1) % 500 == 0:
+        if (epoch+1) % 1105 == 0 or (epoch+1) % 1104 == 0 or (epoch+1) % 1103 == 0:
             with open(results_file, 'a') as f:
                 f.write(f'\nTesting model_{i+1}...\n')
 
