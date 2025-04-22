@@ -1,8 +1,19 @@
+######################## Description ############################
+# Method 1 Script Used to Train the CNN on All Four Image Inputs,
+# Using a Static Train/Val/Test Split Approach
+#
+# Created by Nicholas Powell
+# Laboratory for Functional Optical Imaging & Spectroscopy
+# University of Arkansas
+#
+# Please note: For easier reference, images are referred to
+# as NADH, FAD, SHG, and ORR instead of I_755/blue, I_855/green,
+# I_855/UV, and optical ratio, respectively.
+#################################################################
+
 ## Imports ##
 import pandas as pd
 import torch
-from sklearn.model_selection import train_test_split
-from sympy.stats.rv import sampling_E
 from torch.utils.data import Subset
 import torchvision.transforms.v2 as tvt
 from torch.utils.data import DataLoader
@@ -21,11 +32,21 @@ import os
 # ==================================
 # PRESETS/PARAMETERS CONFIGURATION
 # ==================================
-data_dir = "data/newData"
-labels_csv = "data/newData/labels.csv"
+# Setting configuration paths for input data and labels
+data_dir = "data/newData"   # Path to data directory containing sample imagees
+labels_csv = "data/newData/labels.csv"  # Path to CSV file containing Recurrence Scores
+# Lambda function to assign a binary label based on a threshold:
+# True if RS>25, else False
 label_fn = lambda x: torch.tensor(float(x > 25))
 
+# Function to set random seed for reproducibility across libraries and experiments
 def set_seed(seed: int = 42) -> None:
+    """
+    Set a fixed random seed for all libraries and configurations
+    to ensure reproducibility of experiments.
+    Parameters:
+    - seed (int): The random seed value. Default is 42.
+    """
     np.random.seed(seed)
     random.seed(seed)
     torch.manual_seed(seed)
@@ -40,28 +61,20 @@ def set_seed(seed: int = 42) -> None:
 set_seed()
 
 # HYPERPARAMETERS
-batch_size = 16
-epochs = 2500
-learning_rate = 1e-4
+# All can be adjusted to monitor and fine-tune model performance
+batch_size = 16 # Number of samples per training batc
+epochs = 2500   # Number of epochs to train
+learning_rate = 1e-4  # Learning rate for optimization
+weight_decay = 0.01 # Regularization parameter to prevent overfitting
 
+# Automatically switch between GPU (if available) and CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # ==================================
 # TRANSFORMS
 # ==================================
-# Custom noise transform
-class AddGaussianNoise:
-    def __init__(self, mean=0., std=0.05):
-        self.mean = mean
-        self.std = std
 
-    def __call__(self, tensor):
-        return tensor + torch.randn_like(tensor) * self.std + self.mean
-
-    def __repr__(self):
-        return f'{self.__class__.__name__}(mean={self.mean}, std={self.std})'
-
-# Transformations for training set
+# Define data augmentation transforms for the training dataset
 train_transform = tvt.Compose([
     tvt.RandomVerticalFlip(p=0.25),
     tvt.RandomHorizontalFlip(p=0.25),
@@ -75,6 +88,7 @@ train_transform = tvt.Compose([
 # Get current date and time
 now = datetime.now()
 timestamp = now.strftime("%m-%d-%Y_%H:%M")
+# Define and initialize a results file to log progress
 results_file = f"results_{timestamp}.md"
 with open(results_file, 'w') as f:
     f.write('# Results \n\n')
@@ -88,13 +102,27 @@ with open(results_file, 'w') as f:
 # ==================================
 # Function to calculate scores and plot roc curve/confusion matrix
 def score_em(t, o):
+    """
+    Calculates evaluation metrics (ROC curve, AUC, thresholds), and saves
+    plots for the ROC curve and confusion matrix.
+    Parameters:
+    - t: Ground truth labels (targets)
+    - o: Model predictions (probabilities/outputs)
+    """
+    # Compute false-positive and true-positive rates and thresholds
     fpr, tpr, thresholds = roc_curve(t, o)
-    test_score = auc(fpr, tpr)
+    test_score = auc(fpr, tpr)  # Calculate the AUC score
+    # Determine the threshold that maximizes TPR - FPR (Youden J Statistic)
     thresh = thresholds[np.argmax(tpr - fpr)]
+    with open(results_fild, 'a') as f:
+        f.write(f'Threshold = {thresh}')
+    # Generate binary predictions using the selected threshold
     preds = [out_value >= thresh for out_value in o]
+    # Plot and save the ROC curve
     roc_display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=test_score)
     roc_display.plot()
     plt.savefig(f'Model_{i+1}_epoch{best_epoch + 1}_roc_curve.png')
+    # Plot and save the confusion matrix
     conf_matrix = ConfusionMatrixDisplay.from_predictions(t, preds)
     conf_matrix.plot()
     plt.savefig(f'Model_{i+1}_epoch{best_epoch + 1}_confusion_matrix.png')
@@ -102,38 +130,34 @@ def score_em(t, o):
 
 # Function to get indices of img_labels belonging to a given set of sample_ids
 def get_indices_by_sample_ids(img_labels, sample_ids_set):
+    """
+    Retrieve indices of data samples corresponding to given sample IDs.
+    Parameters:
+    - img_labels: List of image labels from the dataset.
+    - sample_ids_set: Set containing the target sample IDs.
+    Returns:
+    - indices: List of indices corresponding to the specified sample IDs.
+    """
     indices = []
     for idx, (sample_dir, fov_dir, label, sample_id) in enumerate(img_labels):
-        if sample_id in sample_ids_set:
+        if sample_id in sample_ids_set: # Check if sample ID matches
             indices.append(idx)
     return indices
 
 # =========================================
 # INITIALIZE MODELS, OPTIMIZERS, & LOSS FNS
 # =========================================
+# Configured so that multiple channel sets and models
+# can be trained/evaluated at once
+channel_set = ['nadh', 'fad', 'shg', 'orr']     # Add more in list format if desired
 
-# ORR maps excluded from channels for now -- too many NaN values
-channel_set = [
-    # ['nadh'],   # Model 1
-    # ['fad'],    # Model 2
-    # ['shg'],    # Model 3
-    # ['orr'],    # Model 4
-    #
-    # ['nadh', 'shg'],    # Model 5
+# Empty lists for dynamic initialization of models, optimizers, datasets, loaders, etc.
+models, optimizers, loss_fns = [], [], []
+datasets, train_datasets = [], []
+train_loaders, val_loaders, test_loaders = [], [], []
 
-
-    ['nadh', 'fad', 'shg', 'orr']   # Model 15
-]
-
-models = []
-optimizers = []
-loss_fns = []
-datasets = []
-train_datasets = []
-train_loaders = []
-val_loaders = []
-test_loaders = []
-
+# Sample distribution for training (20), validation (5), and testing (4) sets.
+# Sets were pre-chosen randomly outside of this script
 train_ids = ['Sample_019', 'Sample_015', 'Sample_011', 'Sample_024', 'Sample_005', 'Sample_007', 'Sample_006', 'Sample_013', 'Sample_009', 'Sample_016', 'Sample_010',
              'Sample_026', 'Sample_028', 'Sample_030', 'Sample_017', 'Sample_029', 'Sample_027', 'Sample_014', 'Sample_003', 'Sample_018']
 
@@ -141,12 +165,17 @@ val_ids = ['Sample_020', 'Sample_023', 'Sample_002', 'Sample_008', 'Sample_012']
 
 test_ids = ['Sample_025', 'Sample_001', 'Sample_004', 'Sample_022']
 
+# Main loop to initialize a model for each channel set
 for channels in channel_set:
     in_channels = len(channels)
+    # Initialize CNN model for binary classification with the given input channels
     model = classificationModel(in_channels=in_channels).to(device)
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
+    # Adam optimizer with weight decay
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    # Binary Cross-Entropy Loss for training a binary classifier
     loss_fn = nn.BCELoss()
 
+    # Create dataset with appropriate arguments
     dataset = MicroscopyDataset(
         data_dir=data_dir,
         labels_csv=labels_csv,
@@ -155,7 +184,7 @@ for channels in channel_set:
         label_fn=label_fn
     )
 
-
+    # Create a separate training dataset and apply training transforms
     train_dataset = MicroscopyDataset(
         data_dir=data_dir,
         labels_csv=labels_csv,
@@ -169,15 +198,17 @@ for channels in channel_set:
     val_indices = get_indices_by_sample_ids(dataset.img_labels, set(val_ids))
     test_indices = get_indices_by_sample_ids(dataset.img_labels, set(test_ids))
 
-    # Create dataset subsets
+    # Create dataset subsets using the computed indices
     train_dataset = Subset(train_dataset, train_indices)
     val_dataset = Subset(dataset, val_indices)
     test_dataset = Subset(dataset, test_indices)
 
+    # Create data loaders for batch processing
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
+    # Append these elements to their respective lists (for handling multiple models)
     models.append(model)
     optimizers.append(optimizer)
     loss_fns.append(loss_fn)
@@ -302,9 +333,7 @@ for i in range(len(models)):
 
                         ys = [item for y in ys for item in y]
                         sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
-                        # targets = [item for target in targets for item in target]
-                        # sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
-                        # score_em(targets, ys)
+
                         score_em(list(averaged_targets.values()), sample_ys)
 
                     fig, ax = plt.subplots(figsize=(6, 4))
@@ -353,13 +382,6 @@ for i in range(len(models)):
             fig.savefig(f'model_{i + 1}_loss_epoch{epoch + 1}.png')
             plt.close(fig)
 
-        # # Test the model at the 500th epoch
-        # if (epoch+1) % 500 == 0:
-        #     with open(results_file, 'a') as f:
-        #         f.write(f'\nTesting model_{i+1}...\n')
-        #
-        #     # Save the model used for testing
-        #     torch.save(model.state_dict(), f'model_{i+1}_epoch{epoch+1}.pt')
 
 
 
