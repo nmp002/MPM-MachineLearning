@@ -114,7 +114,7 @@ def score_em(t, o):
     test_score = auc(fpr, tpr)  # Calculate the AUC score
     # Determine the threshold that maximizes TPR - FPR (Youden J Statistic)
     thresh = thresholds[np.argmax(tpr - fpr)]
-    with open(results_fild, 'a') as f:
+    with open(results_file, 'a') as f:
         f.write(f'Threshold = {thresh}')
     # Generate binary predictions using the selected threshold
     preds = [out_value >= thresh for out_value in o]
