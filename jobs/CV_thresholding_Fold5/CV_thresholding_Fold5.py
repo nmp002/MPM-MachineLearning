@@ -153,7 +153,7 @@ train_ids = ['Sample_001', 'Sample_002', 'Sample_003','Sample_004','Sample_014',
 # val_ids = ['Sample_015', 'Sample_016', 'Sample_017', 'Sample_018', 'Sample_019']  # Fold 3
 # val_ids = ['Sample_020', 'Sample_022', 'Sample_023', 'Sample_024', 'Sample_025']  # Fold 4
 # val_ids = ['Sample_026', 'Sample_027', 'Sample_028', 'Sample_029', 'Sample_030']  # Fold 5
-val_ids = ['Sample_026', 'Sample_029', 'Sample_030']  # Fold 5 - sitting out Sample 27 and 28
+val_ids = ['Sample_026', 'Sample_028', 'Sample_029', 'Sample_030']  # Fold 5 - sitting out Sample 27 only
 # Leaving out Samples 10-13 for future testing
 
 for channels in channel_set:
