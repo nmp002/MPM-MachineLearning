@@ -146,7 +146,7 @@ class MicroscopyDataset(Dataset):
             image = self.transform(image)
 
         # Process the label with the given function (e.g., scaling, normalization, etc.)
-        label = self.label_fn(label) if self.label_fn else label
+        label = self.label_fn(label)
 
         # Return the processed image tensor, label tensor, and the sample ID
         return image, label, sample_id
