@@ -95,10 +95,10 @@ def score_em(t, o, which_set):
     preds = [out_value >= thresh for out_value in o]
     roc_display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=test_score)
     roc_display.plot()
-    plt.savefig(f'Model_{i+1}_epoch{epoch + 1}_roc_curve_{which_set}.png')
+    plt.savefig(f'Model_{i+1}_epoch{best_epoch + 1}_roc_curve_{which_set}.png')
     conf_matrix = ConfusionMatrixDisplay.from_predictions(t, preds)
     conf_matrix.plot()
-    plt.savefig(f'Model_{i+1}_epoch{epoch + 1}_confusion_matrix.png')
+    plt.savefig(f'Model_{i+1}_epoch{best_epoch + 1}_confusion_matrix_{which_set}.png')
 
     return thresh
 
