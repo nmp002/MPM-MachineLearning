@@ -303,7 +303,7 @@ for i in range(len(models)):
 
                 test_predictions = [out_value >= threshold for out_value in sample_ys_test]
 
-                conf_matrix_test_set = ConfusionMatrixDisplay.from_predictions(averaged_targets_test, test_predictions)
+                conf_matrix_test_set = ConfusionMatrixDisplay.from_predictions(list(averaged_targets_test.values()), test_predictions)
                 conf_matrix_test_set.plot()
                 plt.savefig(f'Model_{i + 1}_epoch{epoch + 1}_confusion_matrix_test_set.png')
 
