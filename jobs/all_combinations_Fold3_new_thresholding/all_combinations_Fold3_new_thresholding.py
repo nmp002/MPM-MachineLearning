@@ -41,7 +41,7 @@ set_seed()
 
 # HYPERPARAMETERS
 batch_size = 16
-epochs = 1105
+epochs = 2500
 learning_rate = 1e-6
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -231,7 +231,7 @@ for i in range(len(models)):
 
 
         # Calculate the threshold at the final epoch
-        if (epoch+1) == epochs:
+        if (epoch+1) == epochs/2 or (epoch+1) == epochs:
             with open(results_file, 'a') as f:
                 f.write(f'\nCalculating Threshold for Model_{i+1}...\n')
 
