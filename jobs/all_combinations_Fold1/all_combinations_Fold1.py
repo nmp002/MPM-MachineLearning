@@ -1,8 +1,20 @@
+######################## Description ############################
+# Method 2 Script Used to Train the CNN on All Combinations of
+# Image Inputs.
+# This script handles one Fold distribution at a time. Change
+# the specific train_ids and test_ids for each Fold.
+
+# Created by Nicholas Powell
+# Laboratory for Functional Optical Imaging & Spectroscopy
+# University of Arkansas
+#
+# Please note: For easier reference, images are referred to
+# as NADH, FAD, SHG, and ORR instead of I_755/blue, I_855/green,
+# I_855/UV, and optical ratio, respectively.
+#################################################################
+
 ## Imports ##
-import pandas as pd
 import torch
-from sklearn.model_selection import train_test_split
-from sympy.stats.rv import sampling_E
 from torch.utils.data import Subset
 import torchvision.transforms.v2 as tvt
 from torch.utils.data import DataLoader
@@ -134,6 +146,7 @@ train_ids = ['Sample_007', 'Sample_008', 'Sample_009', 'Sample_010', 'Sample_011
  'Sample_013', 'Sample_014', 'Sample_015', 'Sample_016', 'Sample_017', 'Sample_018',
  'Sample_019', 'Sample_020', 'Sample_022', 'Sample_023', 'Sample_024', 'Sample_025', 'Sample_026', 'Sample_027', 'Sample_028', 'Sample_029', 'Sample_030']
 
+# Change training and test ids for each Fold distribution
 test_ids = ['Sample_001', 'Sample_002', 'Sample_003','Sample_004','Sample_005', 'Sample_006']    # Fold 1
 # test_ids = ['Sample_007', 'Sample_008', 'Sample_009', 'Sample_010', 'Sample_011', 'Sample_012']  # Fold 2
 # test_ids = ['Sample_013', 'Sample_014', 'Sample_015', 'Sample_016', 'Sample_017', 'Sample_018']  # Fold 3
@@ -214,12 +227,6 @@ for i in range(len(models)):
             if invalid_targets.numel() > 0:
                 print(f'Found invalid model targets: {invalid_targets}')
 
-            # print(f'Out for Epoch {epoch+1}: {out}')
-            # print(f'Target for Epoch {epoch+1}: {target}')
-
-            # if torch.isnan(out).any:
-            #     print(f'NaN detected -- skipping this batch')
-            #     continue
 
             loss = loss_fn(out, target)
 
@@ -227,7 +234,7 @@ for i in range(len(models)):
             optimizer.step()
 
         # Test the model at the 500th epoch
-        if (epoch+1) % 1105 == 0 or (epoch+1) % 1104 == 0 or (epoch+1) % 1103 == 0:
+        if (epoch+1) == epochs:
             with open(results_file, 'a') as f:
                 f.write(f'\nTesting model_{i+1}...\n')
 
@@ -261,9 +268,6 @@ for i in range(len(models)):
 
                 ys = [item for y in ys for item in y]
                 sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
-                # targets = [item for target in targets for item in target]
-                # sample_targets = np.mean(np.array(targets).reshape(-1, 5), axis=1)
-                # score_em(targets, ys)
                 score_em(list(averaged_targets.values()), sample_ys)
 
 
