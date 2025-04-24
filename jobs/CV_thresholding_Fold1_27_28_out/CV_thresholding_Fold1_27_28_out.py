@@ -392,7 +392,7 @@ for i in range(len(models)):
                     break
 
         # Plot loss curves at specified epochs
-        if (epoch + 1) % 50 == 0:
+        if (epoch + 1) % 500 == 0:
             fig, ax = plt.subplots(figsize=(6, 4))
 
             # Plot raw training loss
