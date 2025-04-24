@@ -214,7 +214,7 @@ for epoch in range(epochs):
 
             ys = [item for y in ys for item in y]
             sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
-            threshold = 0.4896
+            threshold = 0.5
             with open(results_file, 'a') as f:
                 f.write(f'Average CV Threshold for Model 3: {threshold}\n')
 
