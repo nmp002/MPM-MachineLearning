@@ -143,12 +143,12 @@ train_loaders = []
 test_loaders = []
 
 train_ids = ['Sample_002', 'Sample_026', 'Sample_017', 'Sample_024', 'Sample_005', 'Sample_020',
-             'Sample_003', 'Sample_030', 'Sample_013', 'Sample_018', 'Sample_028', 'Sample_011'
+             'Sample_003', 'Sample_030', 'Sample_013', 'Sample_018', 'Sample_028', 'Sample_011',
              'Sample_006', 'Sample_022', 'Sample_016', 'Sample_012', 'Sample_007', 'Sample_001',
              'Sample_015', 'Sample_009', 'Sample_029', 'Sample_019', 'Sample_008']
 
 # Change training and test ids for each Fold distribution
-test_ids = ['Sample_023', 'Sample_004', 'Sample_010', 'Sample_025', 'Sample_14', 'Sample_027']    # Fold 1 - (High/Low = 3/3)
+test_ids = ['Sample_023', 'Sample_004', 'Sample_010', 'Sample_025', 'Sample_014', 'Sample_027']    # Fold 1 - (High/Low = 3/3)
 # test_ids = ['Sample_002', 'Sample_026', 'Sample_017', 'Sample_024', 'Sample_005', 'Sample_020']  # Fold 2 - (High/Low = 3/3)
 # test_ids = ['Sample_003', 'Sample_030', 'Sample_013', 'Sample_018', 'Sample_028', 'Sample_011']  # Fold 3 - (High/Low = 3/3)
 # test_ids = ['Sample_006','Sample_022', 'Sample_016', Sample_012', 'Sample_007', 'Sample_001']     # Fold 4 - (High/Low = 3/3)
