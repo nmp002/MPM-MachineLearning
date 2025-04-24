@@ -83,21 +83,6 @@ with open(results_file, 'w') as f:
     f.write(f'Learning rate: {learning_rate}\n')
 
 
-# ==================================
-# DEFINE SCORING FUNCTION
-# ==================================
-# Function to calculate scores and plot roc curve/confusion matrix
-def score_em(t, o):
-    # fpr, tpr, thresholds = roc_curve(t, o)
-    # test_score = auc(fpr, tpr)
-    thresh = 0.50
-    preds = [out_value >= thresh for out_value in o]
-    # roc_display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=test_score)
-    # roc_display.plot()
-    # plt.savefig(f'Model_{i+1}_epoch{epoch + 1}_roc_curve.png')
-    conf_matrix = ConfusionMatrixDisplay.from_predictions(t, preds)
-    conf_matrix.plot()
-    plt.savefig(f'Model_{i+1}_epoch{epoch + 1}_confusion_matrix.png')
 
 
 # Function to get indices of img_labels belonging to a given set of sample_ids
@@ -269,6 +254,26 @@ for i in range(len(models)):
 
                 ys = [item for y in ys for item in y]
                 sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
-                score_em(list(averaged_targets.values()), sample_ys)
+
+                threshold = 0.50
+                true_values = list(averaged_targets.values())
+
+                predictions = [out_value >= threshold for out_value in sample_ys]
+
+                # Compare predictions with true values
+                mismatched_samples = [sample for sample, pred, true in zip(averaged_targets.keys(),
+                                        predictions, true_values) if pred != true]
+
+                # Log mismatched samples
+                with open(results_file, 'a') as f:
+                    f.write('Incorrect Predictions:\n')
+                    for sample in mismatched_samples:
+                        f.write(f' - {sample}\n')
+                print(f'Incorrect Predictions: {mismatched_samples}')   # Log to console as well
+
+                # Plot confusion matrix
+                conf_matrix = ConfusionMatrixDisplay.from_predictions(true_values, predictions)
+                conf_matrix.plot()
+                plt.savefig(f'Model_{i + 1}_epoch{epoch + 1}_confusion_matrix.png')
 
 
