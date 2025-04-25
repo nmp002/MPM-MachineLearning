@@ -92,7 +92,7 @@ def get_indices_by_sample_ids(img_labels, sample_ids_set):
 # INITIALIZE MODELS, OPTIMIZERS, & LOSS FNS
 # =========================================
 
-channels = ['nadh']   # Model 3
+channels = ['fad']   # Model 3
 
 
 train_ids = ['Sample_001', 'Sample_002', 'Sample_003','Sample_004','Sample_014',
@@ -144,7 +144,7 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 
 with open(results_file, 'a') as f:
-    f.write(f'\nTraining model_1:\n')
+    f.write(f'\nTraining model_2:\n')
     f.write(f'Channel Inputs: {channels}\n')
 
 train_losses = []
@@ -180,11 +180,11 @@ for epoch in range(epochs):
 
 
     if (epoch+1) == epochs:
-        torch.save(model.state_dict(), 'Model1_for_Testing.pt')
+        torch.save(model.state_dict(), 'Model2_for_Testing.pt')
         with open(results_file, 'a') as f:
-            f.write('Testing Model 1 with Average CV Threshold...\n')
+            f.write('Testing Model 2 with Average CV Threshold...\n')
 
-        model.load_state_dict(torch.load('Model1_for_Testing.pt'))
+        model.load_state_dict(torch.load('Model2_for_Testing.pt'))
 
 
         with torch.no_grad():
@@ -214,16 +214,16 @@ for epoch in range(epochs):
 
             ys = [item for y in ys for item in y]
             sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
-            threshold = 0.4576
+            threshold = 0.57526
             with open(results_file, 'a') as f:
-                f.write(f'Average CV Threshold for Model 1: {threshold}\n')
+                f.write(f'Average CV Threshold for Model 2: {threshold}\n')
 
             t = list(averaged_targets.values())
             o = sample_ys
             preds = [out_value >= threshold for out_value in o]
             conf_matrix = ConfusionMatrixDisplay.from_predictions(t, preds)
             conf_matrix.plot()
-            plt.savefig(f'Model_1_epoch{epochs}_confusion_matrix_Test_Set.png')
+            plt.savefig(f'Model_2_epoch{epochs}_confusion_matrix_Test_Set.png')
 
 
 
@@ -240,10 +240,10 @@ for epoch in range(epochs):
 
         ax.set_xlabel('Epoch')
         ax.set_ylabel('Loss')
-        ax.set_title(f'Model 3 Loss Curve')
+        ax.set_title(f'Model 2 Loss Curve')
         ax.legend()
         fig.tight_layout()
-        fig.savefig(f'model_3_loss_epoch{epoch + 1}.png')
+        fig.savefig(f'model_2_loss_epoch{epoch + 1}.png')
         plt.close(fig)
 
 
