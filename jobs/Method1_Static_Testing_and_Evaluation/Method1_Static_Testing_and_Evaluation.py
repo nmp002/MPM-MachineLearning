@@ -149,7 +149,7 @@ def get_indices_by_sample_ids(img_labels, sample_ids_set):
 # =========================================
 # Configured so that multiple channel sets and models
 # can be trained/evaluated at once
-channel_set = ['nadh', 'fad', 'shg', 'orr']     # Add more in list format if desired
+channel_set = [['nadh', 'fad', 'shg', 'orr']]     # Add more in list format if desired
 
 # Empty lists for dynamic initialization of models, optimizers, datasets, loaders, etc.
 models, optimizers, loss_fns = [], [], []
