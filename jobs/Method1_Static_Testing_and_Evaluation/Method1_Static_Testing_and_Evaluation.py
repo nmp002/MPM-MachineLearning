@@ -158,12 +158,12 @@ train_loaders, val_loaders, test_loaders = [], [], []
 
 # Sample distribution for training (20), validation (5), and testing (4) sets.
 # Sets were pre-chosen randomly outside of this script
-train_ids = ['Sample_019', 'Sample_015', 'Sample_011', 'Sample_024', 'Sample_005', 'Sample_007', 'Sample_006', 'Sample_013', 'Sample_009', 'Sample_016', 'Sample_010',
-             'Sample_026', 'Sample_028', 'Sample_030', 'Sample_017', 'Sample_029', 'Sample_027', 'Sample_014', 'Sample_003', 'Sample_018']
+train_ids = ['Sample_019', 'Sample_015', 'Sample_011', 'Sample_024', 'Sample_005', 'Sample_007', 'Sample_006', 'Sample_022', 'Sample_009', 'Sample_016', 'Sample_010',
+             'Sample_025', 'Sample_028', 'Sample_030', 'Sample_017', 'Sample_029', 'Sample_027', 'Sample_014', 'Sample_003', 'Sample_018']
 
 val_ids = ['Sample_020', 'Sample_023', 'Sample_002', 'Sample_008', 'Sample_012']
 
-test_ids = ['Sample_025', 'Sample_001', 'Sample_004', 'Sample_022']
+test_ids = ['Sample_026', 'Sample_001', 'Sample_004', 'Sample_013']
 
 # Main loop to initialize a model for each channel set
 for channels in channel_set:
@@ -333,8 +333,16 @@ for i in range(len(models)):
 
                         ys = [item for y in ys for item in y]
                         sample_ys = np.mean(np.array(ys).reshape(-1, 5), axis=1)
+                        t = list(averaged_targets.values())
+                        threshold = 0.5
+                        # Generate binary predictions using the selected threshold
+                        preds = [out_value >= threshold for out_value in sample_ys]
 
-                        score_em(list(averaged_targets.values()), sample_ys)
+                        # Plot and save the confusion matrix
+                        conf_matrix = ConfusionMatrixDisplay.from_predictions(t, preds)
+                        conf_matrix.plot()
+                        plt.savefig(f'Model_{i + 1}_epoch{best_epoch + 1}_confusion_matrix.png')
+
 
                     fig, ax = plt.subplots(figsize=(6, 4))
 
