@@ -97,6 +97,20 @@ class MicroscopyDataset(Dataset):
         # Print details about the loaded dataset for debugging or progress tracking
         print(f"Found {len(sample_dirs)} Samples for a total of {len(self.img_labels)} FoVs.")
 
+        # === Compute max values for NADH, FAD, and SHG across the dataset for normalization === #
+        self.channel_max = {"nadh": 0.0, "fad": 0.0, "shg": 0.0}
+
+        for sample_path, fov_dir, _, sample_id in self.img_labels:
+            fov_path = os.path.join(self.data_dir, sample_id, fov_dir)
+            for channel in self.channels:
+                if channel in ['nadh', 'fad', 'shg']:
+                    image_filename = f'{channel}.tiff'
+                    image_path = os.path.join(fov_path, image_filename)
+                    img_tensor = tiff_to_tensor(image_path)
+                    current_max = img_tensor.max().item()
+                    if current_max > self.channel_max[channel]:
+                        self.channel_max[channel] = current_max
+
     def __len__(self):
         """
         Return the total number of field-of-views (FoVs) in the dataset.
@@ -136,6 +150,14 @@ class MicroscopyDataset(Dataset):
 
             # Load the image and append its tensor to the list
             img_tensor = tiff_to_tensor(image_path)
+
+            # Normalize NADH, FAD, SHG using precomputed maximums
+            if channel in ['nadh', 'fad', 'shg']:
+                max_value = self.channel_max[channel]
+                if max_value > 0:
+                    img_tensor = img_tensor / max_value
+
+            # ORR maps remain unchanged (already between 0 and 1)
             channel_tensors.append(img_tensor)
 
         # Concatenate along the channel dimension to create a single multi-channel image tensor
