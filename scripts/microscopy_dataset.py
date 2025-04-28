@@ -111,6 +111,8 @@ class MicroscopyDataset(Dataset):
                     if current_max > self.channel_max[channel]:
                         self.channel_max[channel] = current_max
 
+        print(f"Channel maximums computed: {self.channel_max}")
+
     def __len__(self):
         """
         Return the total number of field-of-views (FoVs) in the dataset.
