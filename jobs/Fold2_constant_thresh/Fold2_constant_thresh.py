@@ -65,9 +65,14 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 train_transform = tvt.Compose([
     tvt.RandomVerticalFlip(p=0.25),
     tvt.RandomHorizontalFlip(p=0.25),
-    tvt.RandomRotation(degrees=(-180, 180)),
-    tvt.RandomResizedCrop(size=512, scale=(0.8, 1.0))  # Random zoom-in
+    tvt.RandomChoice([
+        tvt.RandomRotation(degrees=[0, 0]),
+        tvt.RandomRotation(degrees=[90, 90]),
+        tvt.RandomRotation(degrees=[180, 180]),
+    ]),
+    tvt.RandomResizedCrop(size=512, scale=(0.8, 1.0))
 ])
+
 
 # ==================================
 # RESULTS FILE CONFIGURATION
