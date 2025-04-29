@@ -131,7 +131,11 @@ class MicroscopyDataset(Dataset):
         # Process each channel and load the corresponding image
         for channel in self.channels:
             # Dynamically construct the image file path based on channel name
-            image_filename = f'{channel}.tiff'
+            if channel in ['fad', 'nadh', 'shg']:  # Use normalized versions for these channels
+                image_filename = f'{channel}_norm.tiff'
+            else:  # Keep the original filename for 'orr' and other potential channels
+                image_filename = f'{channel}.tiff'
+
             image_path = os.path.join(fov_path, image_filename)
 
             # Load the image and append its tensor to the list
