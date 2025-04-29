@@ -1,3 +1,16 @@
+######################## Description ############################
+# Custom Dataset to Manage and Load Multi-Channel MPM Image
+# Data for Deep Learning.
+
+# Created by Nicholas Powell
+# Laboratory for Functional Optical Imaging & Spectroscopy
+# University of Arkansas
+#
+# Please note: For easier reference, images are referred to
+# as NADH, FAD, SHG, and ORR instead of I_755/blue, I_855/green,
+# I_855/UV, and optical ratio, respectively.
+#################################################################
+
 ## Imports ##
 import os
 import pandas as pd
@@ -6,7 +19,6 @@ import tifffile
 import numpy as np
 from torch.utils.data import Dataset
 from pathlib import Path
-
 
 # Function to load a .tiff image file and convert it into a PyTorch tensor
 def tiff_to_tensor(path):
@@ -71,25 +83,22 @@ class MicroscopyDataset(Dataset):
         for sample_path in sample_dirs:
             sample_id = Path(sample_path).name  # Extract sample ID from the directory name
 
-            # Get all field-of-view directories within the current sample directory
             fov_dirs = sorted([f for f in os.listdir(sample_path)
                                if os.path.isdir(os.path.join(sample_path, f))])
 
             for fov_dir in fov_dirs:
-                # Assign a label from the CSV file (e.g., recurrence_score)
                 label = torch.tensor(self.sample_labels.loc[Path(sample_path).name, 'recurrence_score'])
-
-                # Append metadata: (sample directory, fov directory, label, and sample ID)
                 self.img_labels.append((sample_path, fov_dir, label, sample_id))
 
         # Print details about the loaded dataset for debugging or progress tracking
         print(f"Found {len(sample_dirs)} Samples for a total of {len(self.img_labels)} FoVs.")
 
-        # === Compute 99.9th percentile values for NADH, FAD, and SHG across the dataset for normalization === #
-        self.channel_percentile = {"nadh": None, "fad": None, "shg": None}
+        # === Compute mean and std for NADH, FAD, and SHG across the dataset for normalization === #
+        self.channel_mean = {"nadh": None, "fad": None, "shg": None}
+        self.channel_std = {"nadh": None, "fad": None, "shg": None}
         pixel_values = {"nadh": [], "fad": [], "shg": []}
 
-        print("Collecting pixel values for percentile normalization...")
+        print("Collecting pixel values for mean/std normalization...")
 
         for sample_path, fov_dir, _, sample_id in self.img_labels:
             fov_path = os.path.join(self.data_dir, sample_id, fov_dir)
@@ -102,11 +111,13 @@ class MicroscopyDataset(Dataset):
         for channel in pixel_values:
             if pixel_values[channel]:
                 all_pixels = torch.cat(pixel_values[channel]).numpy()
-                self.channel_percentile[channel] = np.percentile(all_pixels, 99.9)
+                self.channel_mean[channel] = np.mean(all_pixels)
+                self.channel_std[channel] = np.std(all_pixels)
             else:
                 print(f"Warning: No pixel values found for {channel}; skipping normalization.")
 
-        print(f"Channel 99.9th percentiles computed: {self.channel_percentile}")
+        print(f"Channel means computed: {self.channel_mean}")
+        print(f"Channel std deviations computed: {self.channel_std}")
 
     def __len__(self):
         """
@@ -141,19 +152,18 @@ class MicroscopyDataset(Dataset):
 
         # Process each channel and load the corresponding image
         for channel in self.channels:
-            # Dynamically construct the image file path based on channel name
             image_filename = f'{channel}.tiff'
             image_path = os.path.join(fov_path, image_filename)
 
             # Load the image
             img_tensor = tiff_to_tensor(image_path)
 
-            # Normalize NADH, FAD, SHG using precomputed 99.9th percentile values
-            if channel in self.channel_percentile and self.channel_percentile[channel] is not None:
-                pval = self.channel_percentile[channel]
-                if pval > 1e-6:  # avoid division by near-zero
-                    img_tensor = img_tensor / pval
-                    img_tensor = torch.clamp(img_tensor, 0, 1)
+            # Normalize NADH, FAD, SHG using the (value - mean - 3*std) / (6*std) formula
+            if channel in self.channel_mean and self.channel_mean[channel] is not None:
+                mean_val = self.channel_mean[channel]
+                std_val = self.channel_std[channel]
+                if std_val > 1e-6:  # avoid division by near-zero
+                    img_tensor = (img_tensor - mean_val - 3 * std_val) / (6 * std_val)
 
             # ORR maps and other channels remain unchanged
             channel_tensors.append(img_tensor)
