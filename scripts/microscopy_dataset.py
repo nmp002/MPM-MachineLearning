@@ -158,12 +158,12 @@ class MicroscopyDataset(Dataset):
             # Load the image
             img_tensor = tiff_to_tensor(image_path)
 
-            # Normalize NADH, FAD, SHG using the (value - mean - 3*std) / (6*std) formula
+            # Normalize NADH, FAD, SHG using the (value - mean + 3*std) / (6*std) formula
             if channel in self.channel_mean and self.channel_mean[channel] is not None:
                 mean_val = self.channel_mean[channel]
                 std_val = self.channel_std[channel]
                 if std_val > 1e-6:  # avoid division by near-zero
-                    img_tensor = (img_tensor - mean_val - 3 * std_val) / (6 * std_val)
+                    img_tensor = (img_tensor - mean_val + 3 * std_val) / (6 * std_val)
 
             # ORR maps and other channels remain unchanged
             channel_tensors.append(img_tensor)
