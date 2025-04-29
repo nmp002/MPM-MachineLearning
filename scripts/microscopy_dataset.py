@@ -14,11 +14,11 @@
 ## Imports ##
 import os
 import pandas as pd
-import torch
-import tifffile
-import numpy as np
 from torch.utils.data import Dataset
+import tifffile
+import torch
 from pathlib import Path
+
 
 # Function to load a .tiff image file and convert it into a PyTorch tensor
 def tiff_to_tensor(path):
@@ -43,6 +43,7 @@ def tiff_to_tensor(path):
 
     return img_tensor
 
+
 # Define a PyTorch Dataset class to manage microscopy images and labels
 class MicroscopyDataset(Dataset):
     def __init__(self, data_dir, labels_csv, channels=('fad', 'nadh', 'orr', 'shg'), transform=None, label_fn=None):
@@ -56,10 +57,18 @@ class MicroscopyDataset(Dataset):
         - channels (tuple): Tuple of strings specifying channel names (e.g., 'fad', 'nadh').
         - transform (callable, optional): Transformations to apply to the image data.
         - label_fn (callable, optional): Function to process the labels (e.g., convert to one-hot or normalize).
+
+        Attributes:
+        - self.data_dir: Root directory for the data.
+        - self.sample_labels: DataFrame containing the mapping between samples and labels (indexed by sample ID).
+        - self.transform: Transformations to apply to the images (if any).
+        - self.channels: Channels to load for each image (e.g., FAD, NADH).
+        - self.label_fn: Function to preprocess the labels.
+        - self.img_labels: List containing metadata for each image (sample directory, fov directory, label, sample ID).
         """
         self.data_dir = data_dir
-        self.sample_labels = pd.read_csv(labels_csv)
-        self.sample_labels.set_index('sample_id', inplace=True)
+        self.sample_labels = pd.read_csv(labels_csv)  # Load CSV file as a DataFrame
+        self.sample_labels.set_index('sample_id', inplace=True)  # Use sample_id as the index for efficient lookups
         self.transform = transform
         self.channels = channels
         self.label_fn = label_fn
@@ -72,41 +81,21 @@ class MicroscopyDataset(Dataset):
                               if os.path.isdir(os.path.join(self.data_dir, d))])
 
         for sample_path in sample_dirs:
-            sample_id = Path(sample_path).name
+            sample_id = Path(sample_path).name  # Extract sample ID from the directory name
 
+            # Get all field-of-view directories within the current sample directory
             fov_dirs = sorted([f for f in os.listdir(sample_path)
                                if os.path.isdir(os.path.join(sample_path, f))])
 
             for fov_dir in fov_dirs:
-                label = torch.tensor(self.sample_labels.loc[sample_id, 'recurrence_score'])
+                # Assign a label from the CSV file (e.g., recurrence_score)
+                label = torch.tensor(self.sample_labels.loc[Path(sample_path).name, 'recurrence_score'])
+
+                # Append metadata: (sample directory, fov directory, label, and sample ID)
                 self.img_labels.append((sample_path, fov_dir, label, sample_id))
 
+        # Print details about the loaded dataset for debugging or progress tracking
         print(f"Found {len(sample_dirs)} Samples for a total of {len(self.img_labels)} FoVs.")
-
-        # === Compute 99.5th percentile values for NADH, FAD, and SHG across the dataset === #
-        self.channel_percentile = {"nadh": 0.0, "fad": 0.0, "shg": 0.0}
-        pixel_values = {"nadh": [], "fad": [], "shg": []}
-
-        print("Collecting pixel values for percentile normalization...")
-        for sample_path, fov_dir, _, sample_id in self.img_labels:
-            fov_path = os.path.join(self.data_dir, sample_id, fov_dir)
-            for channel in self.channels:
-                if channel in pixel_values:
-                    image_path = os.path.join(fov_path, f"{channel}.tiff")
-                    img_tensor = tiff_to_tensor(image_path)
-                    pixel_values[channel].append(img_tensor.flatten())
-
-        # Compute 99.5th percentile intensity for each relevant channel
-        for channel in pixel_values:
-            if pixel_values[channel]:  # Only compute if there are images loaded
-                all_pixels = torch.cat(pixel_values[channel]).numpy()
-                self.channel_percentile[channel] = np.percentile(all_pixels, 99.5)
-            else:
-                # If no images loaded for this channel, skip normalization
-                print(f"Warning: No pixel values collected for {channel}. Skipping percentile calculation.")
-                self.channel_percentile[channel] = None
-
-        print(f"Channel 99.5th percentiles computed: {self.channel_percentile}")
 
     def __len__(self):
         """
@@ -130,32 +119,39 @@ class MicroscopyDataset(Dataset):
             - label (torch.Tensor): Label tensor (processed by `label_fn` if provided).
             - sample_id (str): Sample ID, useful for debugging or traceability.
         """
+        # Retrieve metadata for the specified index
         sample_dir, fov_dir, label, sample_id = self.img_labels[idx]
+
+        # Path to the specific FoV directory
         fov_path = os.path.join(self.data_dir, sample_id, fov_dir)
 
+        # List to store tensors for each channel
         channel_tensors = []
 
+        # Process each channel and load the corresponding image
         for channel in self.channels:
+            # Dynamically construct the image file path based on channel name
             image_filename = f'{channel}.tiff'
             image_path = os.path.join(fov_path, image_filename)
 
+            # Load the image and append its tensor to the list
             img_tensor = tiff_to_tensor(image_path)
-
-            # Normalize NADH, FAD, SHG using precomputed 99.5th percentiles
-            if channel in self.channel_percentile and self.channel_percentile[channel] is not None:
-                pval = self.channel_percentile[channel]
-                if pval > 0:
-                    img_tensor = img_tensor / pval
-                    img_tensor = torch.clamp(img_tensor, 0, 1)
-
-            # ORR maps remain unchanged (already between 0 and 1)
             channel_tensors.append(img_tensor)
 
+        # Concatenate along the channel dimension to create a single multi-channel image tensor
         image = torch.cat(channel_tensors, dim=0)
 
+        # Apply any user-defined transformations (if provided)
         if self.transform:
             image = self.transform(image)
 
+        # Process the label with the given function (e.g., scaling, normalization, etc.)
         label = self.label_fn(label)
 
+        # Return the processed image tensor, label tensor, and the sample ID
         return image, label, sample_id
+
+
+
+
+
