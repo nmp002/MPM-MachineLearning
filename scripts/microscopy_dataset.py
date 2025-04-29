@@ -1,22 +1,10 @@
-######################## Description ############################
-# Custom Dataset to Manage and Load Multi-Channel MPM Image
-# Data for Deep Learning.
-
-# Created by Nicholas Powell
-# Laboratory for Functional Optical Imaging & Spectroscopy
-# University of Arkansas
-#
-# Please note: For easier reference, images are referred to
-# as NADH, FAD, SHG, and ORR instead of I_755/blue, I_855/green,
-# I_855/UV, and optical ratio, respectively.
-#################################################################
-
 ## Imports ##
 import os
 import pandas as pd
-from torch.utils.data import Dataset
-import tifffile
 import torch
+import tifffile
+import numpy as np
+from torch.utils.data import Dataset
 from pathlib import Path
 
 
@@ -97,6 +85,29 @@ class MicroscopyDataset(Dataset):
         # Print details about the loaded dataset for debugging or progress tracking
         print(f"Found {len(sample_dirs)} Samples for a total of {len(self.img_labels)} FoVs.")
 
+        # === Compute 99.9th percentile values for NADH, FAD, and SHG across the dataset for normalization === #
+        self.channel_percentile = {"nadh": None, "fad": None, "shg": None}
+        pixel_values = {"nadh": [], "fad": [], "shg": []}
+
+        print("Collecting pixel values for percentile normalization...")
+
+        for sample_path, fov_dir, _, sample_id in self.img_labels:
+            fov_path = os.path.join(self.data_dir, sample_id, fov_dir)
+            for channel in self.channels:
+                if channel in pixel_values:
+                    image_path = os.path.join(fov_path, f"{channel}.tiff")
+                    img_tensor = tiff_to_tensor(image_path)
+                    pixel_values[channel].append(img_tensor.flatten())
+
+        for channel in pixel_values:
+            if pixel_values[channel]:
+                all_pixels = torch.cat(pixel_values[channel]).numpy()
+                self.channel_percentile[channel] = np.percentile(all_pixels, 99.9)
+            else:
+                print(f"Warning: No pixel values found for {channel}; skipping normalization.")
+
+        print(f"Channel 99.9th percentiles computed: {self.channel_percentile}")
+
     def __len__(self):
         """
         Return the total number of field-of-views (FoVs) in the dataset.
@@ -134,8 +145,17 @@ class MicroscopyDataset(Dataset):
             image_filename = f'{channel}.tiff'
             image_path = os.path.join(fov_path, image_filename)
 
-            # Load the image and append its tensor to the list
+            # Load the image
             img_tensor = tiff_to_tensor(image_path)
+
+            # Normalize NADH, FAD, SHG using precomputed 99.9th percentile values
+            if channel in self.channel_percentile and self.channel_percentile[channel] is not None:
+                pval = self.channel_percentile[channel]
+                if pval > 1e-6:  # avoid division by near-zero
+                    img_tensor = img_tensor / pval
+                    img_tensor = torch.clamp(img_tensor, 0, 1)
+
+            # ORR maps and other channels remain unchanged
             channel_tensors.append(img_tensor)
 
         # Concatenate along the channel dimension to create a single multi-channel image tensor
@@ -150,8 +170,3 @@ class MicroscopyDataset(Dataset):
 
         # Return the processed image tensor, label tensor, and the sample ID
         return image, label, sample_id
-
-
-
-
-
