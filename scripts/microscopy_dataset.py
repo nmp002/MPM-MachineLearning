@@ -98,8 +98,13 @@ class MicroscopyDataset(Dataset):
 
         # Compute 99.5th percentile intensity for each relevant channel
         for channel in pixel_values:
-            all_pixels = torch.cat(pixel_values[channel]).numpy()
-            self.channel_percentile[channel] = np.percentile(all_pixels, 99.5)
+            if pixel_values[channel]:  # Only compute if there are images loaded
+                all_pixels = torch.cat(pixel_values[channel]).numpy()
+                self.channel_percentile[channel] = np.percentile(all_pixels, 99.5)
+            else:
+                # If no images loaded for this channel, skip normalization
+                print(f"Warning: No pixel values collected for {channel}. Skipping percentile calculation.")
+                self.channel_percentile[channel] = None
 
         print(f"Channel 99.5th percentiles computed: {self.channel_percentile}")
 
@@ -137,7 +142,7 @@ class MicroscopyDataset(Dataset):
             img_tensor = tiff_to_tensor(image_path)
 
             # Normalize NADH, FAD, SHG using precomputed 99.5th percentiles
-            if channel in self.channel_percentile:
+            if channel in self.channel_percentile and self.channel_percentile[channel] is not None:
                 pval = self.channel_percentile[channel]
                 if pval > 0:
                     img_tensor = img_tensor / pval
