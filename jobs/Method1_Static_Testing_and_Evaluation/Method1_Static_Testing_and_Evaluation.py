@@ -235,7 +235,7 @@ for i in range(len(models)):
     train_losses = []
     val_losses = []
     best_val_loss = float('inf')
-    patience = 150
+    patience = 70
     patience_counter = 0
     early_stopping = False
     best_model_path = f'model_{i+1}_best.pt'
@@ -361,7 +361,7 @@ for i in range(len(models)):
                     ax.plot(val_losses, label='Validation Loss', color='orange', linewidth=2)
 
                     # Red dashed line at best epoch
-                    ax.axvline(x=best_epoch, color='red', linestyle='--', linewidth=1.5, label = f'Best Epoch: {best_epoch}')
+                    ax.axvline(x=best_epoch, color='red', linestyle='--', linewidth=1.5, label = f'Best Epoch: {best_epoch+1}')
 
                     ax.set_xlabel('Epoch')
                     ax.set_ylabel('Loss')
