@@ -65,7 +65,7 @@ set_seed()
 batch_size = 16 # Number of samples per training batc
 epochs = 3000   # Number of epochs to train
 learning_rate = 1e-6  # Learning rate for optimization
-weight_decay = 0.01 # Regularization parameter to prevent overfitting
+weight_decay = 0.001 # Regularization parameter to prevent overfitting
 
 # Automatically switch between GPU (if available) and CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -235,7 +235,7 @@ for i in range(len(models)):
     train_losses = []
     val_losses = []
     best_val_loss = float('inf')
-    patience = 70
+    patience = 150
     patience_counter = 0
     early_stopping = False
     best_model_path = f'model_{i+1}_best.pt'
