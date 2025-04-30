@@ -64,7 +64,7 @@ set_seed()
 # All can be adjusted to monitor and fine-tune model performance
 batch_size = 16 # Number of samples per training batc
 epochs = 3000   # Number of epochs to train
-learning_rate = 1e-6  # Learning rate for optimization
+learning_rate = 1e-4  # Learning rate for optimization
 weight_decay = 0.001 # Regularization parameter to prevent overfitting
 
 # Automatically switch between GPU (if available) and CPU
