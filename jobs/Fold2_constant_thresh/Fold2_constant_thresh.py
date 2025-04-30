@@ -53,7 +53,7 @@ set_seed()
 
 # HYPERPARAMETERS
 batch_size = 16
-epochs = 1105
+epochs = 1285
 learning_rate = 1e-6
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
