@@ -13,9 +13,7 @@
 # I_855/UV, and optical ratio, respectively.
 #################################################################
 
-## Notes:
-# Job 706805 - 1105 epochs
-# Job 706816 - 2003 epochs (to reflect Method 1)
+
 
 ## Imports ##
 import torch
@@ -57,7 +55,7 @@ set_seed()
 
 # HYPERPARAMETERS
 batch_size = 16
-epochs = 2003
+epochs = 1285
 learning_rate = 1e-6
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
