@@ -8,10 +8,10 @@ importlib_resources==6.5.2
 Jinja2==3.1.5
 kiwisolver==1.4.7
 MarkupSafe==3.0.2
-matplotlib==3.9.4
+matplotlib~=3.10.1
 mpmath==1.3.0
 networkx==3.2.1
-numpy==2.0.2
+numpy~=2.2.3
 packaging==24.2
 pandas==2.2.3
 pillow==11.1.0
@@ -20,13 +20,16 @@ python-dateutil==2.9.0.post0
 pytz==2024.2
 six==1.17.0
 sympy==1.13.1
-tifffile==2024.8.30
-torch==2.4.1
+tifffile~=2025.2.18
+torch~=2.6.0
 torch-directml==0.2.5.dev240914
-torchvision==0.19.1
+torchvision~=0.21.0
 tqdm==4.67.1
 typing_extensions==4.12.2
 tzdata==2025.1
 zipp==3.21.0
 
 scikit-learn~=1.6.1
+
+scipy~=1.15.2
+seaborn~=0.13.2
