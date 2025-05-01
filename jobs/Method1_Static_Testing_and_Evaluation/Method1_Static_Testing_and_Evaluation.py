@@ -65,7 +65,7 @@ set_seed()
 batch_size = 16 # Number of samples per training batc
 epochs = 3000   # Number of epochs to train
 learning_rate = 1e-6  # Learning rate for optimization
-weight_decay = 0.01 # Regularization parameter to prevent overfitting
+weight_decay = 0.01 # Regularization parameter to prevent overfitting # Iteration 3
 
 # Automatically switch between GPU (if available) and CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
