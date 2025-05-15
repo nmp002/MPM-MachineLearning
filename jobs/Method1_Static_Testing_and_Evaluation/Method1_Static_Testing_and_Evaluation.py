@@ -62,10 +62,10 @@ set_seed()
 
 # HYPERPARAMETERS
 # All can be adjusted to monitor and fine-tune model performance
-batch_size = 16 # Number of samples per training batc
-epochs = 3000   # Number of epochs to train
+batch_size = 16 # Number of samples per training batch
+epochs = 3000   # Max number of epochs to train
 learning_rate = 1e-6  # Learning rate for optimization
-weight_decay = 0.01 # Regularization parameter to prevent overfitting # Iteration 3
+weight_decay = 0.01 # Regularization parameter to prevent overfitting -- changed for Iterations 1-4
 
 # Automatically switch between GPU (if available) and CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
